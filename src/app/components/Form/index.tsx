@@ -9,12 +9,6 @@ interface BookFormProps {
 }
 
 const BookForm: React.FC<BookFormProps> = ({ books, setBooks, handleAddBook }) => {
-    const [formatData, setFormatData] = useState<string>('');
-
-    function formatDatInput (value: string) {
-        return value.split('T')[0];
-    }
-
     return (
         <form onSubmit={handleAddBook} style={{
             display: 'flex',
@@ -37,9 +31,9 @@ const BookForm: React.FC<BookFormProps> = ({ books, setBooks, handleAddBook }) =
                 <input
                     type="text"
                     id="bookName"
-                    value={books.Name}
+                    value={books.BookName}
                     onChange={(e) =>
-                        setBooks({ ...books, Name: e.target.value })
+                        setBooks({ ...books, BookName: e.target.value })
                     }
                     style={{
                         width: '100%',
@@ -118,13 +112,13 @@ const BookForm: React.FC<BookFormProps> = ({ books, setBooks, handleAddBook }) =
             </div>
 
             <div style={{ marginBottom: '1.5rem' }}>
-                <label htmlFor="date" style={{ color: '#333', marginBottom: '0.5rem', display: 'block' }}>Date:</label>
+                <label htmlFor="publishDate" style={{ color: '#333', marginBottom: '0.5rem', display: 'block' }}>Publish Date:</label>
                 <input
-                    type="date"
-                    id="date"
-                    value={books.Date ? formatDatInput(books.Date.toString()) : ''}
+                    type="datetime-local"
+                    id="publishDate"
+                    value={books.Date}
                     onChange={(e) =>
-                        setBooks({ ...books, Date: new Date(e.target.value) })
+                        setBooks({ ...books, Date: e.target.value })
                     }
                     style={{
                         width: '100%',
@@ -150,8 +144,7 @@ const BookForm: React.FC<BookFormProps> = ({ books, setBooks, handleAddBook }) =
                 onMouseOver={(e) => e.currentTarget.style.backgroundColor = '#005bb5'}
                 onMouseOut={(e) => e.currentTarget.style.backgroundColor = '#0070f3'}
             >
-                 { books.Id === '' ? 'Add Book' : 'Update Book'}
-                 
+                 { books.Id === '' ? 'Add Book' : 'Update Book'}  
             </button>
         </form>
     );

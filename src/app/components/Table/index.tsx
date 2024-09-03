@@ -71,12 +71,13 @@ const Table: React.FC<TableProps> = ({ books, SetCurrentBook, setBooks  }) => {
                     {tableData.map((row, index) => (
                         <tr key={index}>
                             <td style={fieldStyle}>{row.Id}</td>
-                            <td style={fieldStyle}>{row.Name}</td>
+                            <td style={fieldStyle}>{row.BookName}</td>
                             <td style={fieldStyle}>{row.Author}</td>
                             <td style={fieldStyle}>{row.Category}</td>
                             <td style={fieldStyle}>{row.Price}</td>
                             <td style={fieldStyle}>{row.Date ? formatDatInput(row.Date.toString()) : ''}</td>
                             <td style={fieldStyle}>
+                                
                                 <button onClick={() => handleUpdate(index)}>
                                     Update
                                 </button>

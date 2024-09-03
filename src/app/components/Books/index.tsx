@@ -10,39 +10,50 @@ import Table from '../Table';
 const Books: React.FC = () => {
     const [currentBook, setCurrentBook] = useState<BookDTO>({
         Id: '',
-        Name: '',
+        BookName: '',
         Price: 0,
         Category: '',
         Author: '',
-        Date: new Date(),
+        Date: ''
     });
 
     const [books, setBooks] = useState<BookDTO[]>([]);
+    console.log(currentBook);
 
     const handleAddBook = async (e: React.FormEvent) => {
+        // Verifica se a data de publicação não é menor que a data atual
+    const today = new Date().toISOString().split('T')[0] + 'T00:00:00.000Z'; // Data de hoje em formato ISO 8601
+    if (new Date(currentBook.Date).toISOString() < new Date(today).toISOString()) {
+        alert('Publish Date cannot be earlier than today.');
+        return;
+    }
+
+    // Formata a data de publicação no formato ISO 8601
+    const formattedDate = new Date(currentBook.Date).toISOString();
+
         e.preventDefault();
         if(currentBook.Id === '') {
             try {
-                const bookData = {
+                const bookData: BookDTO = {
                     Id: '',
-                    Name: currentBook.Name,
+                    BookName: currentBook.BookName,
                     Author: currentBook.Author,
                     Price: currentBook.Price,
                     Category: currentBook.Category,
-                    Date: currentBook.Date,
+                    Date: formattedDate
                 };
-    
+
                 await clienteservice.createBook(bookData);
                 
                 setBooks([...books, bookData]);
     
                 setCurrentBook({
                     Id: '',
-                    Name: '',
+                    BookName: '',
                     Price: 0,
                     Category: '',
                     Author: '',
-                    Date: new Date(),
+                    Date: ''
                 })
 
             } catch (error) {
@@ -54,12 +65,12 @@ const Books: React.FC = () => {
             const Id = currentBook.Id;
             try {
                 const bookData = {
-                    Id,
-                    Name: currentBook.Name,
+                    Id: Id,
+                    BookName: currentBook.BookName,
                     Author: currentBook.Author,
                     Price: currentBook.Price,
                     Category: currentBook.Category,
-                    Date: currentBook.Date,
+                    Date: formattedDate
                 };
     
                 await clienteservice.updateBooks(Id, bookData);
@@ -68,11 +79,11 @@ const Books: React.FC = () => {
     
                 setCurrentBook({
                     Id: '',
-                    Name: '',
+                    BookName: '',
                     Price: 0,
                     Category: '',
                     Author: '',
-                    Date: new Date(),
+                    Date: ''
                 })
 
             } catch (error) {
@@ -96,7 +107,6 @@ const Books: React.FC = () => {
         fetchBooks();
     }, []);
     
-    console.log(books);
     return (
         
         <div style={{
