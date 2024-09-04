@@ -1,6 +1,9 @@
 import { BookDTO } from '@/app/models/Book';
 import clienteservice from '@/app/services/clienteService';
 import React, { useEffect, useState } from 'react';
+import { IconButton, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper } from '@mui/material';
+import EditIcon from '@mui/icons-material/Edit';
+import DeleteIcon from '@mui/icons-material/Delete';
 
 interface TableProps {
     books: BookDTO[];
@@ -8,30 +11,19 @@ interface TableProps {
     SetCurrentBook: React.Dispatch<React.SetStateAction<BookDTO>>;
 }
 
-const fieldStyle =
-{
-     padding: '1rem', border: '1px solid #ddd', color: '#000' 
-}
-
-const Table: React.FC<TableProps> = ({ books, SetCurrentBook, setBooks  }) => {
+const TableComponent: React.FC<TableProps> = ({ books, SetCurrentBook, setBooks }) => {
     const [tableData, setTableData] = useState(books);
 
-    function formatDatInput (value: string) {
+    function formatDateInput(value: string) {
         return value.split('T')[0];
     }
 
-    console.log(books, tableData);
-    
     useEffect(() => {
         setTableData(books);
     }, [books]);
 
     const handleUpdate = (index: number) => {
-        const bookSelected = tableData.filter((item, i) => {
-            if (i === index) {
-                return item
-            }
-        });
+        const bookSelected = tableData.filter((item, i) => i === index);
         SetCurrentBook(bookSelected[0]);
     };
 
@@ -41,58 +33,44 @@ const Table: React.FC<TableProps> = ({ books, SetCurrentBook, setBooks  }) => {
     };
 
     return (
-        <div style={{
-            marginTop: '2rem',
-            width: '100%',
-            maxWidth: '1000px',
-            overflowX: 'auto',
-        }}>
-            <table style={{
-                width: '100%',
-                borderCollapse: 'collapse',
-                backgroundColor: '#fff',
-                boxShadow: '0px 0px 10px rgba(0,0,0,0.1)',
-            }}>
-                <thead>
-                    <tr style={{
-                        backgroundColor: '#0070f3',
-                        color: '#fff',
-                    }}>
-                        <th style={fieldStyle}>Id</th>
-                        <th style={fieldStyle}>Book Name</th>
-                        <th style={fieldStyle}>Author</th>
-                        <th style={fieldStyle}>Category</th>
-                        <th style={fieldStyle}>Price</th>
-                        <th style={fieldStyle}>Date</th>
-                        <th style={fieldStyle}>Actions</th>
-                    </tr>
-                </thead>
-                <tbody>
+        <TableContainer component={Paper} style={{ marginTop: '2rem', maxWidth: '1000px', overflowX: 'auto' }}>
+            <Table>
+                <TableHead>
+                    <TableRow style={{ backgroundColor: '#0070f3' }}>
+                        <TableCell style={{ color: '#fff', padding: '1rem', border: '1px solid #ddd' }}>Id</TableCell>
+                        <TableCell style={{ color: '#fff', padding: '1rem', border: '1px solid #ddd' }}>Book Name</TableCell>
+                        <TableCell style={{ color: '#fff', padding: '1rem', border: '1px solid #ddd' }}>Author</TableCell>
+                        <TableCell style={{ color: '#fff', padding: '1rem', border: '1px solid #ddd' }}>Category</TableCell>
+                        <TableCell style={{ color: '#fff', padding: '1rem', border: '1px solid #ddd' }}>Price</TableCell>
+                        <TableCell style={{ color: '#fff', padding: '1rem', border: '1px solid #ddd' }}>Date</TableCell>
+                        <TableCell style={{ color: '#fff', padding: '1rem', border: '1px solid #ddd' }}>Actions</TableCell>
+                    </TableRow>
+                </TableHead>
+                <TableBody>
                     {tableData.map((row, index) => (
-                        <tr key={index}>
-                            <td style={fieldStyle}>{row.Id}</td>
-                            <td style={fieldStyle}>{row.BookName}</td>
-                            <td style={fieldStyle}>{row.Author}</td>
-                            <td style={fieldStyle}>{row.Category}</td>
-                            <td style={fieldStyle}>{row.Price}</td>
-                            <td style={fieldStyle}>{row.Date ? formatDatInput(row.Date.toString()) : ''}</td>
-                            <td style={fieldStyle}>
-                                
-                                <button onClick={() => handleUpdate(index)}>
-                                    Update
-                                </button>
-
-                                <button onClick={() => handleDelete(row.Id)} style={{ marginLeft: '1rem' }}>
-                                    Delete
-                                </button>
-
-                            </td>
-                        </tr>
+                        <TableRow key={index}>
+                            <TableCell style={{ padding: '1rem', border: '1px solid #ddd' }}>{row.Id}</TableCell>
+                            <TableCell style={{ padding: '1rem', border: '1px solid #ddd' }}>{row.BookName}</TableCell>
+                            <TableCell style={{ padding: '1rem', border: '1px solid #ddd' }}>{row.Author}</TableCell>
+                            <TableCell style={{ padding: '1rem', border: '1px solid #ddd' }}>{row.Category}</TableCell>
+                            <TableCell style={{ padding: '1rem', border: '1px solid #ddd' }}>{row.Price}</TableCell>
+                            <TableCell style={{ padding: '1rem', border: '1px solid #ddd' }}>{row.Date ? formatDateInput(row.Date.toString()) : ''}</TableCell>
+                            <TableCell style={{ padding: '1rem', border: '1px solid #ddd' }}>
+                                <div style={{ display: 'flex', alignItems: 'center' }}>
+                                    <IconButton onClick={() => handleUpdate(index)} color="primary" aria-label="update">
+                                        <EditIcon />
+                                    </IconButton>
+                                    <IconButton onClick={() => handleDelete(row.Id)} color="secondary" aria-label="delete" style={{ marginLeft: '1rem' }}>
+                                        <DeleteIcon />
+                                    </IconButton>
+                                </div>
+                            </TableCell>
+                        </TableRow>
                     ))}
-                </tbody>
-            </table>
-        </div>
+                </TableBody>
+            </Table>
+        </TableContainer>
     );
 };
 
-export default Table;
+export default TableComponent;
