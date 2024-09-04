@@ -1,16 +1,58 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { BookDTO } from '@/app/models/Book';
 import CurrencyInput from 'react-currency-input-field';
+import * as Yup from 'yup';
+import { useFormik } from 'formik';
 
 interface BookFormProps {
     books: BookDTO;
-    setBooks: React.Dispatch<React.SetStateAction<BookDTO>>;
-    handleAddBook: (e: React.FormEvent) => void;
+    setBooks: (books: BookDTO) => void;
+    handleAddBook: (values: BookDTO) => void;
 }
 
+const validationSchema = Yup.object({
+    BookName: Yup.string().required('Book Name is required'),
+    Author: Yup.string().required('Author is required'),
+    Price: Yup.number().required('Price is required').positive('Price must be positive'),
+    Category: Yup.string().required('Category is required'),
+    Date: Yup.date().required('Publish Date is required').typeError('Invalid date format'),
+});
+
 const BookForm: React.FC<BookFormProps> = ({ books, setBooks, handleAddBook }) => {
+    const formik = useFormik({
+        initialValues: books,
+        validationSchema,
+        enableReinitialize: true,
+        onSubmit: (values, { setSubmitting }) => {
+            let formattedDate = '';
+
+            try {
+                const date = new Date(values.Date);
+                if (!isNaN(date.getTime())) {
+                    formattedDate = date.toISOString(); // Formato ISO completo
+                } else {
+                    throw new Error("Invalid date");
+                }
+            } catch (error) {
+                console.error("Invalid date format", error);
+                setSubmitting(false);
+                return;
+            }
+
+            const bookData = {
+                ...values,
+                Date: formattedDate,
+            };
+            console.log(values);
+
+            handleAddBook(bookData);
+            setBooks(bookData);
+            setSubmitting(true);
+        },
+    });
+    console.log("form", formik.values);
     return (
-        <form onSubmit={handleAddBook} style={{
+        <form onSubmit={formik.handleSubmit} style={{
             display: 'flex',
             flexDirection: 'column',
             maxWidth: '400px',
@@ -24,17 +66,17 @@ const BookForm: React.FC<BookFormProps> = ({ books, setBooks, handleAddBook }) =
                 textAlign: 'center',
                 marginBottom: '1.5rem',
                 color: '#333'
-            }}>Cadastrar um Book</h1>
+            }}>{books.Id === '' ? 'Cadastrar um Book' : 'Editar Book'}</h1>
 
             <div style={{ marginBottom: '1.5rem' }}>
                 <label htmlFor="bookName" style={{ color: '#333', marginBottom: '0.5rem', display: 'block' }}>Book Name:</label>
                 <input
                     type="text"
                     id="bookName"
-                    value={books.BookName}
-                    onChange={(e) =>
-                        setBooks({ ...books, BookName: e.target.value })
-                    }
+                    name="BookName"
+                    value={formik.values.BookName}
+                    onChange={formik.handleChange}
+                    onBlur={formik.handleBlur}
                     style={{
                         width: '100%',
                         padding: '0.75rem',
@@ -45,6 +87,9 @@ const BookForm: React.FC<BookFormProps> = ({ books, setBooks, handleAddBook }) =
                         outline: 'none',
                     }}
                 />
+                {formik.touched.BookName && formik.errors.BookName ? (
+                    <div style={{ color: 'red', marginTop: '0.5rem' }}>{formik.errors.BookName}</div>
+                ) : null}
             </div>
 
             <div style={{ marginBottom: '1.5rem' }}>
@@ -52,10 +97,10 @@ const BookForm: React.FC<BookFormProps> = ({ books, setBooks, handleAddBook }) =
                 <input
                     type="text"
                     id="author"
-                    value={books.Author}
-                    onChange={(e) =>
-                        setBooks({ ...books, Author: e.target.value })
-                    }
+                    name="Author"
+                    value={formik.values.Author}
+                    onChange={formik.handleChange}
+                    onBlur={formik.handleBlur}
                     style={{
                         width: '100%',
                         padding: '0.75rem',
@@ -66,18 +111,23 @@ const BookForm: React.FC<BookFormProps> = ({ books, setBooks, handleAddBook }) =
                         outline: 'none',
                     }}
                 />
+                {formik.touched.Author && formik.errors.Author ? (
+                    <div style={{ color: 'red', marginTop: '0.5rem' }}>{formik.errors.Author}</div>
+                ) : null}
             </div>
 
             <div style={{ marginBottom: '1.5rem' }}>
                 <label htmlFor="price" style={{ color: '#333', marginBottom: '0.5rem', display: 'block' }}>Price:</label>
                 <CurrencyInput
                     id="price"
-                    value={books.Price}
+                    name="Price"
+                    value={formik.values.Price}
                     decimalsLimit={2}
                     prefix="$"
                     onValueChange={(value) =>
-                        setBooks({ ...books, Price: Number(value) || 0 })
+                        formik.setFieldValue("Price", value || 0)
                     }
+                    onBlur={formik.handleBlur}
                     style={{
                         width: '100%',
                         padding: '0.75rem',
@@ -88,6 +138,9 @@ const BookForm: React.FC<BookFormProps> = ({ books, setBooks, handleAddBook }) =
                         outline: 'none',
                     }}
                 />
+                {formik.touched.Price && formik.errors.Price ? (
+                    <div style={{ color: 'red', marginTop: '0.5rem' }}>{formik.errors.Price}</div>
+                ) : null}
             </div>
 
             <div style={{ marginBottom: '1.5rem' }}>
@@ -95,10 +148,10 @@ const BookForm: React.FC<BookFormProps> = ({ books, setBooks, handleAddBook }) =
                 <input
                     type="text"
                     id="category"
-                    value={books.Category}
-                    onChange={(e) =>
-                        setBooks({ ...books, Category: e.target.value })
-                    }
+                    name="Category"
+                    value={formik.values.Category}
+                    onChange={formik.handleChange}
+                    onBlur={formik.handleBlur}
                     style={{
                         width: '100%',
                         padding: '0.75rem',
@@ -109,17 +162,20 @@ const BookForm: React.FC<BookFormProps> = ({ books, setBooks, handleAddBook }) =
                         outline: 'none',
                     }}
                 />
+                {formik.touched.Category && formik.errors.Category ? (
+                    <div style={{ color: 'red', marginTop: '0.5rem' }}>{formik.errors.Category}</div>
+                ) : null}
             </div>
 
             <div style={{ marginBottom: '1.5rem' }}>
-                <label htmlFor="publishDate" style={{ color: '#333', marginBottom: '0.5rem', display: 'block' }}>Publish Date:</label>
+                <label htmlFor="date" style={{ color: '#333', marginBottom: '0.5rem', display: 'block' }}>Publish Date:</label>
                 <input
                     type="datetime-local"
-                    id="publishDate"
-                    value={books.Date}
-                    onChange={(e) =>
-                        setBooks({ ...books, Date: e.target.value })
-                    }
+                    id="date"
+                    name="Date"
+                    value={formik.values.Date}
+                    onChange={formik.handleChange}
+                    onBlur={formik.handleBlur}
                     style={{
                         width: '100%',
                         padding: '0.75rem',
@@ -130,21 +186,24 @@ const BookForm: React.FC<BookFormProps> = ({ books, setBooks, handleAddBook }) =
                         outline: 'none',
                     }}
                 />
+                {formik.touched.Date && formik.errors.Date ? (
+                    <div style={{ color: 'red', marginTop: '0.5rem' }}>{formik.errors.Date}</div>
+                ) : null}
             </div>
 
-            <button type="submit" style={{
-                padding: '0.75rem',
-                borderRadius: '4px',
-                backgroundColor: '#0070f3',
-                color: '#fff',
-                border: 'none',
-                cursor: 'pointer',
-                transition: 'background-color 0.3s ease',
-            }}
-                onMouseOver={(e) => e.currentTarget.style.backgroundColor = '#005bb5'}
-                onMouseOut={(e) => e.currentTarget.style.backgroundColor = '#0070f3'}
+            <button
+                type="submit"
+                style={{
+                    padding: '0.75rem',
+                    borderRadius: '4px',
+                    border: 'none',
+                    backgroundColor: '#007bff',
+                    color: '#fff',
+                    fontSize: '1rem',
+                    cursor: 'pointer',
+                }}
             >
-                 { books.Id === '' ? 'Add Book' : 'Update Book'}  
+                {books.Id === '' ? 'Add Book' : 'Update Book'}
             </button>
         </form>
     );
