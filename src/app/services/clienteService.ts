@@ -16,12 +16,20 @@ const clienteservice = {
         }
     },
 
-    getBooks: async () => {
+    getBooks: async (page = 1, pageSize = 10) => {
         try {
-            const response = await axios.get(`${BACKEND_URL}books`);
-            return response.data;
+            const response = await axios.get(`${BACKEND_URL}books`, {
+                params: {
+                    page: page,
+                    pageSize: pageSize
+                }
+            });
+    
+            // Certifique-se de que o formato da resposta está correto
+            return response;
         } catch (e) {
-            console.log(e);
+            console.error("Error fetching books:", e);
+            throw e; // Re-throw the error so it can be caught by the calling function
         }
     },
 

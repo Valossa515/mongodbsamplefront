@@ -1,7 +1,7 @@
 import { BookDTO } from '@/app/models/Book';
 import clienteservice from '@/app/services/clienteService';
 import React, { useEffect, useState } from 'react';
-import { IconButton, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, Dialog, DialogActions, DialogContent, DialogTitle, Button } from '@mui/material';
+import { IconButton, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, Dialog, DialogActions, DialogContent, DialogTitle, Button, Pagination } from '@mui/material';
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
 import { ToastContainer, toast } from 'react-toastify';
@@ -14,10 +14,13 @@ interface TableProps {
 }
 
 const TableComponent: React.FC<TableProps> = ({ books, SetCurrentBook, setBooks }) => {
-    const [tableData, setTableData] = useState(books);
+    const [tableData, setTableData] = useState<BookDTO[]>([]);
     const [showToastError, setShowToastError] = useState(false);
     const [openModal, setOpenModal] = useState(false);
     const [deleteId, setDeleteId] = useState<string | null>(null);
+    const [page, setPage] = useState(1);
+    const [pageSize] = useState(10);
+    const [totalCount, setTotalCount] = useState(0);
 
     function formatDateInput(value: string) {
         return value.split('T')[0];
@@ -25,14 +28,18 @@ const TableComponent: React.FC<TableProps> = ({ books, SetCurrentBook, setBooks 
 
     useEffect(() => {
         if (showToastError) {
-          toast.success("Book deleted successfully", {
-            onClose: () => setShowToastError(false),
-            position: "top-right",
-            autoClose: 2000,
-            pauseOnFocusLoss: false,
-          });
+            toast.success("Book deleted successfully", {
+                onClose: () => setShowToastError(false),
+                position: "top-right",
+                autoClose: 2000,
+                pauseOnFocusLoss: false,
+            });
         }
-      }, [showToastError]);
+    }, [showToastError]);
+
+    useEffect(() => {
+        fetchBooks(page, pageSize);
+    }, [page]);
 
     useEffect(() => {
         setTableData(books);
@@ -55,15 +62,49 @@ const TableComponent: React.FC<TableProps> = ({ books, SetCurrentBook, setBooks 
 
     const handleConfirmDelete = async () => {
         if (deleteId) {
-            await clienteservice.deleteBooks(deleteId);
-            setBooks((prevBooks) => prevBooks.filter((book) => book.Id !== deleteId));
-            setShowToastError(true);
+            try {
+                await clienteservice.deleteBooks(deleteId);
+                setBooks((prevBooks) => prevBooks.filter((book) => book.Id !== deleteId));
+                setShowToastError(true); // This should trigger the toast
+            } catch (error) {
+                console.error("Error deleting book:", error);
+            }
             handleCloseModal();
         }
     };
 
+    const fetchBooks = async (page: number, pageSize: number) => {
+        try {
+            const response = await clienteservice.getBooks(page, pageSize);
+            
+            if (response && response.data) {
+                console.log('Books response:', response.data);
+
+                const books = response.data.Data || [];
+                const totalCount = response.data.TotalCount || 0;
+    
+                setBooks(books);
+                setTotalCount(totalCount);
+            } else {
+                console.error('Invalid response format:', response);
+            }
+        } catch (error) {
+            console.error("Error fetching books:", error);
+        }
+    };
+
+    const handlePageChange = (event: React.ChangeEvent<unknown>, value: number) => {
+        setPage(value);
+    };
+
     return (
         <>
+            <Pagination
+                count={Math.ceil(totalCount / pageSize)}
+                page={page}
+                onChange={handlePageChange}
+                color="primary"
+            />
             <TableContainer component={Paper} style={{ marginTop: '2rem', maxWidth: '1000px', overflowX: 'auto' }}>
                 <ToastContainer pauseOnHover={false} draggable={false} autoClose={0}/>
                 <Table>
@@ -79,7 +120,7 @@ const TableComponent: React.FC<TableProps> = ({ books, SetCurrentBook, setBooks 
                         </TableRow>
                     </TableHead>
                     <TableBody>
-                        {tableData.map((row, index) => (
+                        {Array.isArray(tableData) && tableData.map((row, index) => (
                             <TableRow key={index}>
                                 <TableCell style={{ padding: '1rem', border: '1px solid #ddd' }}>{row.Id}</TableCell>
                                 <TableCell style={{ padding: '1rem', border: '1px solid #ddd' }}>{row.BookName}</TableCell>

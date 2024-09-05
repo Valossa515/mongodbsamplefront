@@ -5,7 +5,6 @@ import { useState } from 'react';
 import clienteservice from '@/app/services/clienteService';
 import BookForm from '../Form';
 import Table from '../Table';
-import { log } from 'console';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { Container, Grid, Paper } from '@mui/material';
@@ -21,7 +20,10 @@ const Books: React.FC = () => {
     });
 
     const [books, setBooks] = useState<BookDTO[]>([]);
-    const [showToast, setShowToast] = useState(''); 
+    const [showToast, setShowToast] = useState('');
+    const [totalCount, setTotalCount] = useState(0);
+    const [page] = useState(1);
+    const [pageSize] = useState(10);
 
     useEffect(() => {
         if (showToast === 'add') {
@@ -86,12 +88,23 @@ const Books: React.FC = () => {
 
             const formattedDate = publishDate.toISOString();
 
-            const fetchBooks = async () => {
+            const fetchBooks = async (page: number, pageSize: number) => {
                 try {
-                    const response = await clienteservice.getBooks();
-                    setBooks(response.Result);
+                    const response = await clienteservice.getBooks(page, pageSize);
+                    
+                    if (response && response.data) {
+                        console.log('Books response:', response.data);
+        
+                        const books = response.data.Data || [];
+                        const totalCount = response.data.TotalCount || 0;
+            
+                        setBooks(books);
+                        setTotalCount(totalCount);
+                    } else {
+                        console.error('Invalid response format:', response);
+                    }
                 } catch (error) {
-                    console.error(error);
+                    console.error("Error fetching books:", error);
                 }
             };
 
@@ -117,7 +130,7 @@ const Books: React.FC = () => {
                         Author: '',
                         Date: new Date().toISOString().split('T')[0]
                     });
-                    fetchBooks();
+                    fetchBooks(page, pageSize);
                     setShowToast('add');
 
                 } catch (error) {
@@ -146,7 +159,7 @@ const Books: React.FC = () => {
                         Author: '',
                         Date: new Date().toISOString().split('T')[0]
                     });
-                    fetchBooks();
+                    fetchBooks(page, pageSize);
                     setShowToast('update');
                 } catch (error) {
                     setShowToast('errorupdate');
@@ -158,19 +171,31 @@ const Books: React.FC = () => {
     };
 
     useEffect(() => {
-        const fetchBooks = async () => {
+        const fetchBooks = async (page: number, pageSize: number) => {
             try {
-                const response = await clienteservice.getBooks();
-                setBooks(response.Result);
+                const response = await clienteservice.getBooks(page, pageSize);
+                
+                if (response && response.data) {
+                    console.log('Books response:', response.data);
+    
+                    const books = response.data.Data || [];
+                    const totalCount = response.data.TotalCount || 0;
+        
+                    setBooks(books);
+                    setTotalCount(totalCount);
+                } else {
+                    console.error('Invalid response format:', response);
+                }
             } catch (error) {
-                setShowToast('fetch');
+                console.error("Error fetching books:", error);
             }
         };
-        fetchBooks();
+        fetchBooks(page, pageSize);
     }, []);
 
     return (
         <Container maxWidth="md" style={{ padding: '2rem 0' }}>
+            <ToastContainer pauseOnHover={false} draggable={false} autoClose={0}/>
             <Paper elevation={3} style={{ padding: '2rem', borderRadius: '8px' }}>
                 <Grid container spacing={3}>
                     <Grid item xs={12}>
