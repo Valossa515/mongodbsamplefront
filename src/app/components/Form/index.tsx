@@ -29,7 +29,7 @@ const BookForm: React.FC<BookFormProps> = ({ books, setBooks, handleAddBook }) =
             try {
                 const date = new Date(values.Date);
                 if (!isNaN(date.getTime())) {
-                    formattedDate = date.toISOString(); // Formato ISO completo
+                    formattedDate = date.toISOString(); 
                 } else {
                     throw new Error("Invalid date");
                 }
@@ -43,24 +43,42 @@ const BookForm: React.FC<BookFormProps> = ({ books, setBooks, handleAddBook }) =
                 ...values,
                 Date: formattedDate,
             };
-            console.log(values);
-
             handleAddBook(bookData);
             setBooks(bookData);
             setSubmitting(true);
         },
     });
-    console.log("form", formik.values);
+
+    const inputStyle = {
+        width: '100%',
+        padding: '0.75rem',
+        borderRadius: '4px',
+        border: '1px solid #ccc',
+        color: '#333',
+        backgroundColor: '#f7f7f7',
+        outline: 'none',
+        fontSize: '1rem',
+        "::placeholder": {
+            color: '#999', // Cor do placeholder mais suave
+        },
+        "::selection": {
+            color: '#007bff',
+            backgroundColor: '#e6f7ff', // Ajusta a cor da seleção de texto
+        },
+    };
+
     return (
         <form onSubmit={formik.handleSubmit} style={{
             display: 'flex',
             flexDirection: 'column',
-            maxWidth: '400px',
+            maxWidth: '600px',
             width: '100%',
+            margin: '0 auto', // Para centralizar horizontalmente
             padding: '1.5rem',
             boxShadow: '0px 0px 15px rgba(0,0,0,0.1)',
             borderRadius: '8px',
-            backgroundColor: '#fff'
+            backgroundColor: '#fff',
+            gap: '1rem', // Espaçamento entre os elementos do formulário
         }}>
             <h1 style={{
                 textAlign: 'center',
@@ -77,15 +95,8 @@ const BookForm: React.FC<BookFormProps> = ({ books, setBooks, handleAddBook }) =
                     value={formik.values.BookName}
                     onChange={formik.handleChange}
                     onBlur={formik.handleBlur}
-                    style={{
-                        width: '100%',
-                        padding: '0.75rem',
-                        borderRadius: '4px',
-                        border: '1px solid #ccc',
-                        color: '#333',
-                        backgroundColor: '#f7f7f7',
-                        outline: 'none',
-                    }}
+                    placeholder="Enter the book name" // Placeholder mais claro
+                    style={inputStyle}
                 />
                 {formik.touched.BookName && formik.errors.BookName ? (
                     <div style={{ color: 'red', marginTop: '0.5rem' }}>{formik.errors.BookName}</div>
@@ -101,15 +112,8 @@ const BookForm: React.FC<BookFormProps> = ({ books, setBooks, handleAddBook }) =
                     value={formik.values.Author}
                     onChange={formik.handleChange}
                     onBlur={formik.handleBlur}
-                    style={{
-                        width: '100%',
-                        padding: '0.75rem',
-                        borderRadius: '4px',
-                        border: '1px solid #ccc',
-                        color: '#333',
-                        backgroundColor: '#f7f7f7',
-                        outline: 'none',
-                    }}
+                    placeholder="Enter the author name"
+                    style={inputStyle}
                 />
                 {formik.touched.Author && formik.errors.Author ? (
                     <div style={{ color: 'red', marginTop: '0.5rem' }}>{formik.errors.Author}</div>
@@ -124,19 +128,12 @@ const BookForm: React.FC<BookFormProps> = ({ books, setBooks, handleAddBook }) =
                     value={formik.values.Price}
                     decimalsLimit={2}
                     prefix="$"
+                    placeholder="Enter the price"
                     onValueChange={(value) =>
                         formik.setFieldValue("Price", value || 0)
                     }
                     onBlur={formik.handleBlur}
-                    style={{
-                        width: '100%',
-                        padding: '0.75rem',
-                        borderRadius: '4px',
-                        border: '1px solid #ccc',
-                        color: '#333',
-                        backgroundColor: '#f7f7f7',
-                        outline: 'none',
-                    }}
+                    style={inputStyle}
                 />
                 {formik.touched.Price && formik.errors.Price ? (
                     <div style={{ color: 'red', marginTop: '0.5rem' }}>{formik.errors.Price}</div>
@@ -152,15 +149,8 @@ const BookForm: React.FC<BookFormProps> = ({ books, setBooks, handleAddBook }) =
                     value={formik.values.Category}
                     onChange={formik.handleChange}
                     onBlur={formik.handleBlur}
-                    style={{
-                        width: '100%',
-                        padding: '0.75rem',
-                        borderRadius: '4px',
-                        border: '1px solid #ccc',
-                        color: '#333',
-                        backgroundColor: '#f7f7f7',
-                        outline: 'none',
-                    }}
+                    placeholder="Enter the category"
+                    style={inputStyle}
                 />
                 {formik.touched.Category && formik.errors.Category ? (
                     <div style={{ color: 'red', marginTop: '0.5rem' }}>{formik.errors.Category}</div>
@@ -176,15 +166,7 @@ const BookForm: React.FC<BookFormProps> = ({ books, setBooks, handleAddBook }) =
                     value={formik.values.Date}
                     onChange={formik.handleChange}
                     onBlur={formik.handleBlur}
-                    style={{
-                        width: '100%',
-                        padding: '0.75rem',
-                        borderRadius: '4px',
-                        border: '1px solid #ccc',
-                        color: '#333',
-                        backgroundColor: '#f7f7f7',
-                        outline: 'none',
-                    }}
+                    style={inputStyle}
                 />
                 {formik.touched.Date && formik.errors.Date ? (
                     <div style={{ color: 'red', marginTop: '0.5rem' }}>{formik.errors.Date}</div>
