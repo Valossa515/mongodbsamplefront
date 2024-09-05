@@ -29,7 +29,7 @@ const BookForm: React.FC<BookFormProps> = ({ books, setBooks, handleAddBook }) =
             try {
                 const date = new Date(values.Date);
                 if (!isNaN(date.getTime())) {
-                    formattedDate = date.toISOString(); 
+                    formattedDate = date.toISOString();
                 } else {
                     throw new Error("Invalid date");
                 }

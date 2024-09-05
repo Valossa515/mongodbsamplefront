@@ -65,7 +65,7 @@ const TableComponent: React.FC<TableProps> = ({ books, SetCurrentBook, setBooks 
             try {
                 await clienteservice.deleteBooks(deleteId);
                 setBooks((prevBooks) => prevBooks.filter((book) => book.Id !== deleteId));
-                setShowToastError(true); // This should trigger the toast
+                setShowToastError(true);
             } catch (error) {
                 console.error("Error deleting book:", error);
             }
@@ -78,7 +78,6 @@ const TableComponent: React.FC<TableProps> = ({ books, SetCurrentBook, setBooks 
             const response = await clienteservice.getBooks(page, pageSize);
             
             if (response && response.data) {
-                console.log('Books response:', response.data);
 
                 const books = response.data.Data || [];
                 const totalCount = response.data.TotalCount || 0;

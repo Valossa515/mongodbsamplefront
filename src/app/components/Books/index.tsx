@@ -93,7 +93,6 @@ const Books: React.FC = () => {
                     const response = await clienteservice.getBooks(page, pageSize);
                     
                     if (response && response.data) {
-                        console.log('Books response:', response.data);
         
                         const books = response.data.Data || [];
                         const totalCount = response.data.TotalCount || 0;
@@ -176,8 +175,6 @@ const Books: React.FC = () => {
                 const response = await clienteservice.getBooks(page, pageSize);
                 
                 if (response && response.data) {
-                    console.log('Books response:', response.data);
-    
                     const books = response.data.Data || [];
                     const totalCount = response.data.TotalCount || 0;
         

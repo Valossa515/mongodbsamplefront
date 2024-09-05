@@ -12,7 +12,7 @@ const clienteservice = {
             });
             return response.data;
         } catch (e) {
-            console.log(e);
+            console.error(e);
         }
     },
 
@@ -24,12 +24,11 @@ const clienteservice = {
                     pageSize: pageSize
                 }
             });
-    
-            // Certifique-se de que o formato da resposta está correto
+
             return response;
         } catch (e) {
             console.error("Error fetching books:", e);
-            throw e; // Re-throw the error so it can be caught by the calling function
+            throw e;
         }
     },
 
@@ -45,7 +44,7 @@ const clienteservice = {
         }
         catch(e)
         {
-            console.log(e);
+            console.error(e);
         }
     },
 
@@ -57,7 +56,7 @@ const clienteservice = {
         }
         catch(e)
         {
-            console.log(e);
+            console.error(e);
         }
     }
 };

@@ -12,7 +12,7 @@ const LayoutWithDrawer: React.FC<{ children: React.ReactNode }> = ({ children })
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [showBackButton, setShowBackButton] = useState(true);
   const [showBooksButton, setShowBooksButton] = useState(true);
-  const pathname = usePathname(); // Usa o hook usePathname para obter o caminho atual
+  const pathname = usePathname();
 
   const toggleDrawer = (open: boolean) => (event: React.KeyboardEvent | React.MouseEvent) => {
     if (event.type === 'keydown' && ((event as React.KeyboardEvent).key === 'Tab' || (event as React.KeyboardEvent).key === 'Shift')) {
@@ -22,14 +22,12 @@ const LayoutWithDrawer: React.FC<{ children: React.ReactNode }> = ({ children })
   };
 
   useEffect(() => {
-    // Verifica se estamos na página inicial ("/") ou na página de livros ("/books")
     setShowBackButton(pathname !== "/");
     setShowBooksButton(pathname !== "/books");
   }, [pathname]);
 
   return (
     <Box className="flex flex-col min-h-screen bg-gray-100 dark:bg-gray-900">
-      {/* AppBar com ícone de menu */}
       <AppBar position="fixed" className="bg-blue-600">
         <Toolbar>
           <IconButton
@@ -54,7 +52,6 @@ const LayoutWithDrawer: React.FC<{ children: React.ReactNode }> = ({ children })
         </Toolbar>
       </AppBar>
 
-      {/* Drawer retrátil no topo */}
       <Drawer anchor="left" open={drawerOpen} onClose={toggleDrawer(false)}>
         <Box sx={{ width: 250, backgroundColor: "#132039", height: "100%" }}>
           <Typography variant="h6" className="p-4" sx={{ color: "#ffffff" }}>
@@ -81,7 +78,6 @@ const LayoutWithDrawer: React.FC<{ children: React.ReactNode }> = ({ children })
         </Box>
       </Drawer>
 
-      {/* Conteúdo da página */}
       <Box className="flex-grow flex flex-col items-center justify-center text-center mt-16 p-6">
         {children}
       </Box>
