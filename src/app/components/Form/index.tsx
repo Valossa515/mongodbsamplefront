@@ -3,6 +3,7 @@ import { BookDTO } from '@/app/models/Book';
 import CurrencyInput from 'react-currency-input-field';
 import * as Yup from 'yup';
 import { useFormik } from 'formik';
+import { Grid, TextField, Button, Typography } from '@mui/material';
 
 interface BookFormProps {
     books: BookDTO;
@@ -25,7 +26,6 @@ const BookForm: React.FC<BookFormProps> = ({ books, setBooks, handleAddBook }) =
         enableReinitialize: true,
         onSubmit: (values, { setSubmitting }) => {
             let formattedDate = '';
-
             try {
                 const date = new Date(values.Date);
                 if (!isNaN(date.getTime())) {
@@ -49,144 +49,97 @@ const BookForm: React.FC<BookFormProps> = ({ books, setBooks, handleAddBook }) =
         },
     });
 
-    const inputStyle = {
-        width: '100%',
-        padding: '0.75rem',
-        borderRadius: '4px',
-        border: '1px solid #ccc',
-        color: '#333',
-        backgroundColor: '#f7f7f7',
-        outline: 'none',
-        fontSize: '1rem',
-        "::placeholder": {
-            color: '#999', // Cor do placeholder mais suave
-        },
-        "::selection": {
-            color: '#007bff',
-            backgroundColor: '#e6f7ff', // Ajusta a cor da seleção de texto
-        },
-    };
-
     return (
-        <form onSubmit={formik.handleSubmit} style={{
-            display: 'flex',
-            flexDirection: 'column',
-            maxWidth: '600px',
-            width: '100%',
-            margin: '0 auto', // Para centralizar horizontalmente
-            padding: '1.5rem',
-            boxShadow: '0px 0px 15px rgba(0,0,0,0.1)',
-            borderRadius: '8px',
-            backgroundColor: '#fff',
-            gap: '1rem', // Espaçamento entre os elementos do formulário
-        }}>
-            <h1 style={{
-                textAlign: 'center',
-                marginBottom: '1.5rem',
-                color: '#333'
-            }}>{books.Id === '' ? 'Cadastrar um Book' : 'Editar Book'}</h1>
-
-            <div style={{ marginBottom: '1.5rem' }}>
-                <label htmlFor="bookName" style={{ color: '#333', marginBottom: '0.5rem', display: 'block' }}>Book Name:</label>
-                <input
-                    type="text"
-                    id="bookName"
-                    name="BookName"
-                    value={formik.values.BookName}
-                    onChange={formik.handleChange}
-                    onBlur={formik.handleBlur}
-                    placeholder="Enter the book name" // Placeholder mais claro
-                    style={inputStyle}
-                />
-                {formik.touched.BookName && formik.errors.BookName ? (
-                    <div style={{ color: 'red', marginTop: '0.5rem' }}>{formik.errors.BookName}</div>
-                ) : null}
-            </div>
-
-            <div style={{ marginBottom: '1.5rem' }}>
-                <label htmlFor="author" style={{ color: '#333', marginBottom: '0.5rem', display: 'block' }}>Author:</label>
-                <input
-                    type="text"
-                    id="author"
-                    name="Author"
-                    value={formik.values.Author}
-                    onChange={formik.handleChange}
-                    onBlur={formik.handleBlur}
-                    placeholder="Enter the author name"
-                    style={inputStyle}
-                />
-                {formik.touched.Author && formik.errors.Author ? (
-                    <div style={{ color: 'red', marginTop: '0.5rem' }}>{formik.errors.Author}</div>
-                ) : null}
-            </div>
-
-            <div style={{ marginBottom: '1.5rem' }}>
-                <label htmlFor="price" style={{ color: '#333', marginBottom: '0.5rem', display: 'block' }}>Price:</label>
-                <CurrencyInput
-                    id="price"
-                    name="Price"
-                    value={formik.values.Price}
-                    decimalsLimit={2}
-                    prefix="$"
-                    placeholder="Enter the price"
-                    onValueChange={(value) =>
-                        formik.setFieldValue("Price", value || 0)
-                    }
-                    onBlur={formik.handleBlur}
-                    style={inputStyle}
-                />
-                {formik.touched.Price && formik.errors.Price ? (
-                    <div style={{ color: 'red', marginTop: '0.5rem' }}>{formik.errors.Price}</div>
-                ) : null}
-            </div>
-
-            <div style={{ marginBottom: '1.5rem' }}>
-                <label htmlFor="category" style={{ color: '#333', marginBottom: '0.5rem', display: 'block' }}>Category:</label>
-                <input
-                    type="text"
-                    id="category"
-                    name="Category"
-                    value={formik.values.Category}
-                    onChange={formik.handleChange}
-                    onBlur={formik.handleBlur}
-                    placeholder="Enter the category"
-                    style={inputStyle}
-                />
-                {formik.touched.Category && formik.errors.Category ? (
-                    <div style={{ color: 'red', marginTop: '0.5rem' }}>{formik.errors.Category}</div>
-                ) : null}
-            </div>
-
-            <div style={{ marginBottom: '1.5rem' }}>
-                <label htmlFor="date" style={{ color: '#333', marginBottom: '0.5rem', display: 'block' }}>Publish Date:</label>
-                <input
-                    type="datetime-local"
-                    id="date"
-                    name="Date"
-                    value={formik.values.Date}
-                    onChange={formik.handleChange}
-                    onBlur={formik.handleBlur}
-                    style={inputStyle}
-                />
-                {formik.touched.Date && formik.errors.Date ? (
-                    <div style={{ color: 'red', marginTop: '0.5rem' }}>{formik.errors.Date}</div>
-                ) : null}
-            </div>
-
-            <button
-                type="submit"
-                style={{
-                    padding: '0.75rem',
-                    borderRadius: '4px',
-                    border: 'none',
-                    backgroundColor: '#007bff',
-                    color: '#fff',
-                    fontSize: '1rem',
-                    cursor: 'pointer',
-                }}
-            >
-                {books.Id === '' ? 'Add Book' : 'Update Book'}
-            </button>
+        <form onSubmit={formik.handleSubmit} style={{ padding: '2rem', backgroundColor: '#fff', borderRadius: '8px', boxShadow: '0 2px 10px rgba(0,0,0,0.1)' }}>
+            <Typography variant="h5" align="center" marginBottom={2}>
+                {books.Id === '' ? 'Cadastrar um Book' : 'Editar Book'}
+            </Typography>
+            <Grid container spacing={2}>
+                <Grid item xs={12}>
+                    <TextField
+                        fullWidth
+                        id="bookName"
+                        name="BookName"
+                        label="Book Name"
+                        value={formik.values.BookName}
+                        onChange={formik.handleChange}
+                        onBlur={formik.handleBlur}
+                        error={formik.touched.BookName && Boolean(formik.errors.BookName)}
+                        helperText={formik.touched.BookName && formik.errors.BookName}
+                    />
+                </Grid>
+                <Grid item xs={12}>
+                    <TextField
+                        fullWidth
+                        id="author"
+                        name="Author"
+                        label="Author"
+                        value={formik.values.Author}
+                        onChange={formik.handleChange}
+                        onBlur={formik.handleBlur}
+                        error={formik.touched.Author && Boolean(formik.errors.Author)}
+                        helperText={formik.touched.Author && formik.errors.Author}
+                    />
+                </Grid>
+                <Grid item xs={12}>
+                    <CurrencyInput
+                        id="price"
+                        name="Price"
+                        value={formik.values.Price}
+                        decimalsLimit={2}
+                        prefix="$"
+                        placeholder="Enter the price"
+                        onValueChange={(value) => formik.setFieldValue("Price", value || 0)}
+                        onBlur={formik.handleBlur}
+                        style={{
+                            width: '100%',
+                            padding: '16.5px 14px',
+                            borderRadius: '4px',
+                            border: '1px solid #ccc',
+                            color: '#333',
+                        }}
+                    />
+                    {formik.touched.Price && formik.errors.Price ? (
+                        <div style={{ color: 'red', marginTop: '0.5rem' }}>{formik.errors.Price}</div>
+                    ) : null}
+                </Grid>
+                <Grid item xs={12}>
+                    <TextField
+                        fullWidth
+                        id="category"
+                        name="Category"
+                        label="Category"
+                        value={formik.values.Category}
+                        onChange={formik.handleChange}
+                        onBlur={formik.handleBlur}
+                        error={formik.touched.Category && Boolean(formik.errors.Category)}
+                        helperText={formik.touched.Category && formik.errors.Category}
+                    />
+                </Grid>
+                <Grid item xs={12}>
+                    <TextField
+                        fullWidth
+                        id="date"
+                        name="Date"
+                        type="datetime-local"
+                        value={formik.values.Date}
+                        onChange={formik.handleChange}
+                        onBlur={formik.handleBlur}
+                        error={formik.touched.Date && Boolean(formik.errors.Date)}
+                        helperText={formik.touched.Date && formik.errors.Date}
+                    />
+                </Grid>
+                <Grid item xs={12}>
+                    <Button
+                        fullWidth
+                        type="submit"
+                        variant="contained"
+                        color="primary"
+                    >
+                        {books.Id === '' ? 'Add Book' : 'Update Book'}
+                    </Button>
+                </Grid>
+            </Grid>
         </form>
     );
 };

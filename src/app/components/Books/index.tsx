@@ -8,6 +8,7 @@ import Table from '../Table';
 import { log } from 'console';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import { Container, Grid, Paper } from '@mui/material';
 
 const Books: React.FC = () => {
     const [currentBook, setCurrentBook] = useState<BookDTO>({
@@ -169,20 +170,18 @@ const Books: React.FC = () => {
     }, []);
 
     return (
-        
-        <div className="container" style={{
-            display: 'flex',
-            flexDirection: 'column',
-            justifyContent: 'center',
-
-            alignItems: 'center',
-            height: '100%',
-            backgroundColor: '#f7f8fa'
-        }}>
-            <ToastContainer pauseOnHover={false} draggable={false} autoClose={0}/>
-            <BookForm books={currentBook} setBooks={setCurrentBook} handleAddBook={handleAddBook} />
-            <Table books={books} setBooks={setBooks} SetCurrentBook={setCurrentBook} />
-        </div>
+        <Container maxWidth="md" style={{ padding: '2rem 0' }}>
+            <Paper elevation={3} style={{ padding: '2rem', borderRadius: '8px' }}>
+                <Grid container spacing={3}>
+                    <Grid item xs={12}>
+                        <BookForm books={currentBook} setBooks={setCurrentBook} handleAddBook={handleAddBook} />
+                    </Grid>
+                    <Grid item xs={12}>
+                        <Table books={books} setBooks={setBooks} SetCurrentBook={setCurrentBook} />
+                    </Grid>
+                </Grid>
+            </Paper>
+        </Container>
     );
 };
 
