@@ -99,12 +99,15 @@ const TableComponent: React.FC<TableProps> = ({ books, SetCurrentBook, setBooks 
 
     return (
         <>
-            <Pagination
-                count={Math.ceil(totalCount / pageSize)}
-                page={page}
-                onChange={handlePageChange}
-                color="primary"
-            />
+           <div style={{ display: 'flex', justifyContent: 'center', marginTop: '1rem' }}>
+                <Pagination
+                    count={Math.ceil(totalCount / pageSize)}
+                    page={page}
+                    onChange={handlePageChange}
+                    color="primary"
+                />
+            </div>
+            
             <TableContainer component={Paper} style={{ marginTop: '2rem', maxWidth: '1000px', overflowX: 'auto' }}>
                 <ToastContainer pauseOnHover={false} draggable={false} autoClose={0}/>
                 <Table>
