@@ -28,7 +28,15 @@ const HomePage: React.FC = () => {
           >
             <MenuIcon />
           </IconButton>
-          <Typography variant="h6" className="flex-grow font-semibold">
+          <Typography
+            variant="h6"
+            className="flex-grow font-semibold"
+            sx={{
+              color: "#ffffff", // Cor do texto mais clara
+              fontWeight: 'bold', // Negrito
+              fontSize: '1.25rem', // Tamanho da fonte maior
+            }}
+          >
             MongoDB CRUD Sample
           </Typography>
         </Toolbar>
@@ -55,7 +63,11 @@ const HomePage: React.FC = () => {
 
       {/* Conteúdo da página */}
       <Box className="flex-grow flex flex-col items-center justify-center text-center mt-16 p-6">
-        <Typography variant="h4" className="font-bold mb-8 text-gray-900 dark:text-gray-100">
+        <Typography
+          variant="h4"
+          className="font-bold mb-8"
+          sx={{ color: "#e0e0e0" }} // Cor do texto mais clara
+        >
           MongoDB CRUD Sample
         </Typography>
         <Typography variant="body1" className="text-lg text-gray-700 dark:text-gray-300">
