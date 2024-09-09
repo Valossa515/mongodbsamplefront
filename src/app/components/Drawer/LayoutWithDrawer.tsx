@@ -7,6 +7,7 @@ import { AppBar, Toolbar, IconButton, Typography, Drawer, List, ListItem, ListIt
 import MenuIcon from '@mui/icons-material/Menu';
 import AssignmentReturnIcon from '@mui/icons-material/AssignmentReturn';
 import MenuBookIcon from '@mui/icons-material/MenuBook';
+import { useRouter } from 'next/router';
 
 const LayoutWithDrawer: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [drawerOpen, setDrawerOpen] = useState(false);
@@ -25,6 +26,13 @@ const LayoutWithDrawer: React.FC<{ children: React.ReactNode }> = ({ children })
     setShowBackButton(pathname !== "/");
     setShowBooksButton(pathname !== "/books");
   }, [pathname]);
+
+  useEffect(() => {
+    if (localStorage.getItem('authToken') === "" 
+        || localStorage.getItem('authToken') === null) {
+      window.location.href = '/';
+    }
+  }, []);
 
   return (
     <Box className="flex flex-col min-h-screen bg-gray-100 dark:bg-gray-900">
@@ -71,6 +79,15 @@ const LayoutWithDrawer: React.FC<{ children: React.ReactNode }> = ({ children })
                 <ListItemButton component={Link} href="/">
                   <AssignmentReturnIcon sx={{ color: "#ffffff", marginRight: 2 }} />
                   <ListItemText primary="Voltar à Página Inicial" primaryTypographyProps={{ sx: { color: "#ffffff" } }} />
+                </ListItemButton>
+              </ListItem>
+            )}
+
+            {showBackButton && (
+              <ListItem disablePadding>
+                <ListItemButton component={Link} href="/" onClick={() => localStorage.setItem('authToken', "")}>
+                  <AssignmentReturnIcon sx={{ color: "#ffffff", marginRight: 2 }} />
+                  <ListItemText primary="Logout" primaryTypographyProps={{ sx: { color: "#ffffff" } }} />
                 </ListItemButton>
               </ListItem>
             )}

@@ -1,6 +1,17 @@
 import axios from "axios";
 import { BookDTO } from "../models/Book";
 import { BACKEND_URL } from "../utils/system";
+interface LoginResponse {
+    token: string;
+    id: number;
+}
+
+interface RegisterResponse {
+    Id: string;
+    Sucesso: boolean;
+    Mensagem: string;
+    Status: number;
+}
 
 const clienteservice = {
     createBook: async (book: BookDTO) => {
@@ -58,7 +69,39 @@ const clienteservice = {
         {
             console.error(e);
         }
-    }
+    },
+
+    login: async (email: string, password: string): Promise<LoginResponse | null>  => {
+        try {
+            const response = await axios.post(`${BACKEND_URL}users/login`, {
+              email,
+              password,
+              headers: {
+                'Content-Type': 'application/json',
+              },
+              
+            }).then(response => response.data);
+            return response.Result.Token;
+          } catch (error) {
+            console.error('Error:', error);
+            return null;
+          }
+    },
+
+    register: async (name: string, email: string, password: string, confirmPassword: string): Promise<RegisterResponse | null> => {
+        try {
+          const response = await axios.post(`${BACKEND_URL}users/register`, {
+            name,
+            email,
+            password,
+            confirmPassword,
+          }).then(response => response.data);;
+          return response.Result;
+        } catch (error) {
+          console.error('Error:', error);
+          return null;
+        }
+      }
 };
 
 export default clienteservice;
