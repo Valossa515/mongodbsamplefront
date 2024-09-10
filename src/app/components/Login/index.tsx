@@ -1,26 +1,40 @@
 "use client";
 
-import React, { useState } from 'react';
+import React from 'react';
+import { useFormik } from 'formik';
+import * as Yup from 'yup';
 import { TextField, Button, Container, Typography, Box } from '@mui/material';
 import clienteservice from '@/app/services/clienteService';
-const Login: React.FC = () => {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [error, setError] = useState<string | null>(null);
 
-  const handleLogin = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-     await clienteservice.login(email, password).then((response) => {
-      console.log(response)
-      if (response) {
-        localStorage.setItem('authToken', `${response}`);
-        window.location.href = '/';
-        console.log('Login successful');
-      } else {
-        setError('Login failed. Please check your email and password.');
+const Login: React.FC = () => {
+  const validationSchema = Yup.object({
+    email: Yup.string().email('Email inválido').required('Email é obrigatório'),
+    password: Yup.string().required('Password é obrigatório'),
+  });
+
+  const formik = useFormik({
+    initialValues: {
+      email: '',
+      password: '',
+    },
+    validationSchema,
+    onSubmit: async (values, { setSubmitting, setErrors }) => {
+      try {
+        const response = await clienteservice.login(values.email, values.password);
+
+        if (response) {
+          localStorage.setItem('authToken', `${response}`);
+          window.location.href = '/';
+        } else {
+          setErrors({ password: 'Login falhou. Verifique seu email e senha.' });
+        }
+      } catch (error) {
+        setErrors({ password: 'Ocorreu um erro. Por favor, tente novamente.' });
+      } finally {
+        setSubmitting(false);
       }
-     })
-  };
+    },
+  });
 
   return (
     <Container component="main" maxWidth="xs">
@@ -39,19 +53,22 @@ const Login: React.FC = () => {
           component="form"
           noValidate
           sx={{ mt: 1 }}
-          onSubmit={handleLogin}
+          onSubmit={formik.handleSubmit}
         >
           <TextField
             margin="normal"
             required
             fullWidth
             id="email"
-            label="Email"
             name="email"
+            label="Email"
             autoComplete="email"
             autoFocus
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
+            value={formik.values.email}
+            onChange={formik.handleChange}
+            onBlur={formik.handleBlur}
+            error={formik.touched.email && Boolean(formik.errors.email)}
+            helperText={formik.touched.email && formik.errors.email}
           />
           <TextField
             margin="normal"
@@ -62,12 +79,15 @@ const Login: React.FC = () => {
             type="password"
             id="password"
             autoComplete="current-password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
+            value={formik.values.password}
+            onChange={formik.handleChange}
+            onBlur={formik.handleBlur}
+            error={formik.touched.password && Boolean(formik.errors.password)}
+            helperText={formik.touched.password && formik.errors.password}
           />
-          {error && (
+          {formik.errors.password && (
             <Typography color="error" sx={{ mt: 2 }}>
-              {error}
+              {formik.errors.password}
             </Typography>
           )}
           <Button
@@ -75,6 +95,7 @@ const Login: React.FC = () => {
             fullWidth
             variant="contained"
             color="primary"
+            disabled={formik.isSubmitting}
             sx={{ mt: 3, mb: 2 }}
           >
             Login

@@ -1,36 +1,49 @@
 "use client";
-
-import React, { useState } from 'react';
+import React from 'react';
+import { useFormik } from 'formik';
+import * as Yup from 'yup';
 import { TextField, Button, Container, Typography, Box, Paper } from '@mui/material';
 import clienteservice from '@/app/services/clienteService';
 
 const Register: React.FC = () => {
-  const [name, SetName] = useState('');
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [confirmPassword, setConfirmPassword] = useState('');
-  const [error, setError] = useState<string | null>(null);
-  
-  const handleRegister = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
+  const validationSchema = Yup.object({
+    name: Yup.string().required('Nome é obrigatório'),
+    email: Yup.string().email('Email inválido').required('Email é obrigatório'),
+    password: Yup.string().required('Password é obrigatório').min(6, 'Password deve ter pelo menos 6 caracteres'),
+    confirmPassword: Yup.string()
+      .oneOf([Yup.ref('password')], 'As senhas não coincidem')
+      .required('Confirmação de senha é obrigatória'),
+  });
 
-    if (password !== confirmPassword) {
-      setError('As senhas não coincidem.');
-      return;
-    }
+  const formik = useFormik({
+    initialValues: {
+      name: '',
+      email: '',
+      password: '',
+      confirmPassword: '',
+    },
+    validationSchema,
+    onSubmit: async (values, { setSubmitting, setErrors }) => {
+      try {
+        const response = await clienteservice.register(
+          values.name,
+          values.email,
+          values.password,
+          values.confirmPassword
+        );
 
-    try {
-      const response = await clienteservice.register(name, email, password, confirmPassword);
-
-      if (response && response.Sucesso) {
-        window.location.href = '/';
-      } else {
-        setError(response?.Mensagem || 'Falha no registro. Tente novamente.');
+        if (response && response.Sucesso) {
+          window.location.href = '/';
+        } else {
+          setErrors({ email: response?.Mensagem || 'Falha no registro. Tente novamente.' });
+        }
+      } catch (error) {
+        setErrors({ email: 'Ocorreu um erro. Por favor, tente novamente.' });
+      } finally {
+        setSubmitting(false);
       }
-    } catch (error) {
-      setError('Ocorreu um erro. Por favor, tente novamente.');
-    }
-  };
+    },
+  });
 
   return (
     <Container
@@ -54,74 +67,60 @@ const Register: React.FC = () => {
           <Typography component="h1" variant="h5" sx={{ marginBottom: 2 }}>
             Registrar
           </Typography>
-          <Box
-            component="form"
-            noValidate
-            sx={{ mt: 1 }}
-            onSubmit={handleRegister}
-          >
+          <form onSubmit={formik.handleSubmit}>
             <TextField
-              margin="normal"
-              required
               fullWidth
               id="name"
-              label="Nome"
               name="name"
-              autoComplete="name"
-              autoFocus
-              value={name}
-              onChange={(e) => SetName(e.target.value)}
-              InputLabelProps={{ style: { color: '#333' } }}
-              InputProps={{ style: { color: '#000' } }}
+              label="Nome"
+              value={formik.values.name}
+              onChange={formik.handleChange}
+              onBlur={formik.handleBlur}
+              error={formik.touched.name && Boolean(formik.errors.name)}
+              helperText={formik.touched.name && formik.errors.name}
               sx={{ marginBottom: 2 }}
             />
             <TextField
-              margin="normal"
-              required
               fullWidth
               id="email"
-              label="Email"
               name="email"
-              autoComplete="email"
-              autoFocus
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              InputLabelProps={{ style: { color: '#333' } }}
-              InputProps={{ style: { color: '#000' } }}
+              label="Email"
+              value={formik.values.email}
+              onChange={formik.handleChange}
+              onBlur={formik.handleBlur}
+              error={formik.touched.email && Boolean(formik.errors.email)}
+              helperText={formik.touched.email && formik.errors.email}
               sx={{ marginBottom: 2 }}
             />
             <TextField
-              margin="normal"
-              required
               fullWidth
+              id="password"
               name="password"
               label="Password"
               type="password"
-              id="password"
-              autoComplete="new-password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              InputLabelProps={{ style: { color: '#333' } }}
-              InputProps={{ style: { color: '#000' } }}
+              value={formik.values.password}
+              onChange={formik.handleChange}
+              onBlur={formik.handleBlur}
+              error={formik.touched.password && Boolean(formik.errors.password)}
+              helperText={formik.touched.password && formik.errors.password}
               sx={{ marginBottom: 2 }}
             />
             <TextField
-              margin="normal"
-              required
               fullWidth
+              id="confirmPassword"
               name="confirmPassword"
               label="Confirmar Password"
               type="password"
-              id="confirmPassword"
-              value={confirmPassword}
-              onChange={(e) => setConfirmPassword(e.target.value)}
-              InputLabelProps={{ style: { color: '#333' } }}
-              InputProps={{ style: { color: '#000' } }}
+              value={formik.values.confirmPassword}
+              onChange={formik.handleChange}
+              onBlur={formik.handleBlur}
+              error={formik.touched.confirmPassword && Boolean(formik.errors.confirmPassword)}
+              helperText={formik.touched.confirmPassword && formik.errors.confirmPassword}
               sx={{ marginBottom: 2 }}
             />
-            {error && (
+            {formik.errors.email && (
               <Typography color="error" sx={{ mt: 2 }}>
-                {error}
+                {formik.errors.email}
               </Typography>
             )}
             <Button
@@ -129,6 +128,7 @@ const Register: React.FC = () => {
               fullWidth
               variant="contained"
               color="primary"
+              disabled={formik.isSubmitting}
               sx={{
                 mt: 3,
                 mb: 2,
@@ -140,7 +140,7 @@ const Register: React.FC = () => {
             >
               Registrar
             </Button>
-          </Box>
+          </form>
         </Box>
       </Paper>
     </Container>
