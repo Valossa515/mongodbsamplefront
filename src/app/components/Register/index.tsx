@@ -121,11 +121,7 @@ const Register: React.FC = () => {
               helperText={formik.touched.confirmPassword && formik.errors.confirmPassword}
               sx={{ marginBottom: 2 }}
             />
-            {formik.errors.email && (
-              <Typography color="error" sx={{ mt: 2 }}>
-                {formik.errors.email}
-              </Typography>
-            )}
+            
             <Button
               type="submit"
               fullWidth
