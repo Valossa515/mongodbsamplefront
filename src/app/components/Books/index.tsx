@@ -118,8 +118,16 @@ const Books: React.FC = () => {
                         Date: formattedDate
                     };
 
-                    await clienteservice.createBook(bookData);
-                    setBooks([...books, bookData]);
+                    await clienteservice.createBook(bookData)
+                    .then((response) => {
+                        console.log(response);
+                        if(response) {
+                            setShowToast('add');
+                        }
+                        else{
+                            setShowToast('erroadd');
+                        }
+                    });
 
                     setCurrentBook({
                         Id: '',
@@ -130,7 +138,6 @@ const Books: React.FC = () => {
                         Date: new Date().toISOString().split('T')[0]
                     });
                     fetchBooks(page, pageSize);
-                    setShowToast('add');
 
                 } catch (error) {
                     setShowToast('erroadd');
@@ -169,25 +176,28 @@ const Books: React.FC = () => {
         }
     };
 
-    useEffect(() => {
-        const fetchBooks = async (page: number, pageSize: number) => {
-            try {
-                const response = await clienteservice.getBooks(page, pageSize);
-                
-                if (response && response.data) {
-                    const books = response.data.Data || [];
-                    const totalCount = response.data.TotalCount || 0;
-        
-                    setBooks(books);
-                    setTotalCount(totalCount);
-                } else {
-                    console.error('Invalid response format:', response);
-                }
-            } catch (error) {
-                console.error("Error fetching books:", error);
+    const fetchBooks = async (page: number, pageSize: number) => {
+        try {
+            const response = await clienteservice.getBooks(page, pageSize);
+            
+            if (response && response.data) {
+                const books = response.data.Data || [];
+                const totalCount = response.data.TotalCount || 0;
+    
+                setBooks(books);
+                setTotalCount(totalCount);
+            } else {
+                console.error('Invalid response format:', response);
             }
-        };
-        fetchBooks(page, pageSize);
+        } catch (error) {
+            console.error("Error fetching books:", error);
+        }
+    };
+
+    useEffect(() => {
+        if(localStorage.getItem('authToken') !== "" && localStorage.getItem('authToken') !== null) {
+            fetchBooks(page, pageSize);
+        }
     }, []);
 
     return (

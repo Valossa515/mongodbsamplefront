@@ -16,10 +16,16 @@ interface RegisterResponse {
 const clienteservice = {
     createBook: async (book: BookDTO) => {
         try {
+            const token = localStorage.getItem('authToken');
+            if (!token) {
+                throw new Error('Token not found');
+            }
             const response = await axios.post(`${BACKEND_URL}books/cadastro`, book, {
                 headers: {
-                    "Content-Type": "application/json"
-                }
+                    "Content-Type": "application/json",
+                    Authorization: `Bearer ${token}`,
+                },
+                maxRedirects: 0
             });
             return response.data;
         } catch (e) {
@@ -29,13 +35,22 @@ const clienteservice = {
 
     getBooks: async (page = 1, pageSize = 10) => {
         try {
+            const token = localStorage.getItem('authToken');
+            if (!token) {
+                throw new Error('Token not found');
+            }
+            console.log('Token:', token);
             const response = await axios.get(`${BACKEND_URL}books`, {
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                },
                 params: {
                     page: page,
                     pageSize: pageSize
-                }
+                },
+                maxRedirects: 0
             });
-
+    
             return response;
         } catch (e) {
             console.error("Error fetching books:", e);
@@ -46,10 +61,16 @@ const clienteservice = {
     updateBooks: async (id: string, book: BookDTO) => {
         try
         {
+            const token = localStorage.getItem('authToken');
+            if (!token) {
+                throw new Error('Token not found');
+            }
             const response = await axios.put(`${BACKEND_URL}books/${id}`, book, {
                 headers: {
-                    "Content-Type": "application/json"
-                }
+                    "Content-Type": "application/json",
+                    Authorization: `Bearer ${token}`,
+                },
+                maxRedirects: 0
             });
             return response.data;
         }
@@ -62,7 +83,17 @@ const clienteservice = {
     deleteBooks: async (id: string) => {
         try
         {
-            const response = await axios.delete(`${BACKEND_URL}books/${id}`);
+            const token = localStorage.getItem('authToken');
+            if (!token) {
+                throw new Error('Token not found');
+            }
+            const response = await axios.delete(`${BACKEND_URL}books/${id}`, {
+                headers: {
+                    "Content-Type": "application/json",
+                    Authorization: `Bearer ${token}`,
+                },
+                maxRedirects: 0
+            });
             return response.data;
         }
         catch(e)
