@@ -30,7 +30,7 @@ const LoginPage: React.FC = () => {
         console.log('response', response);
         if (response) {
           localStorage.setItem('authToken', `${response}`);
-          //window.location.href = '/';
+          window.location.href = '/';
         } else {
           setErrors({ password: 'Login falhou. Verifique seu email e senha.' });
         }
