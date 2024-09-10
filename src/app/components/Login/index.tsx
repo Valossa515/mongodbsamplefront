@@ -3,11 +3,11 @@
 import React from 'react';
 import { useFormik } from 'formik';
 import * as Yup from 'yup';
-import { TextField, Button, Container, Typography, Box } from '@mui/material';
+import { TextField, Button, Container, Typography, Box, FormHelperText } from '@mui/material';
 import clienteservice from '@/app/services/clienteService';
 
 const Login: React.FC = () => {
-  
+
   const validationSchema = Yup.object({
     email: Yup.string().email('Email inválido').required('Email é obrigatório'),
     password: Yup.string().required('Password é obrigatório'),
@@ -69,8 +69,11 @@ const Login: React.FC = () => {
             onChange={formik.handleChange}
             onBlur={formik.handleBlur}
             error={formik.touched.email && Boolean(formik.errors.email)}
-            helperText={formik.touched.email && formik.errors.email}
           />
+          {formik.touched.email && formik.errors.email && (
+            <FormHelperText error>{formik.errors.email}</FormHelperText>
+          )}
+
           <TextField
             margin="normal"
             required
@@ -84,9 +87,15 @@ const Login: React.FC = () => {
             onChange={formik.handleChange}
             onBlur={formik.handleBlur}
             error={formik.touched.password && Boolean(formik.errors.password)}
-            
-            helperText={(formik.touched.password && formik.errors.password) || formik.errors.password}
           />
+          {formik.touched.password && formik.errors.password && (
+            <FormHelperText error>{formik.errors.password}</FormHelperText>
+          )}
+
+          {formik.errors.password && !formik.touched.password && (
+            <FormHelperText error>{formik.errors.password}</FormHelperText>
+          )}
+
           <Button
             type="submit"
             fullWidth
