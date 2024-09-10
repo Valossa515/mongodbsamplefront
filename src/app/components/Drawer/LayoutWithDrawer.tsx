@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import Link from "next/link";
 import { usePathname } from 'next/navigation'; // Importa o hook usePathname
 import { AppBar, Toolbar, IconButton, Typography, Drawer, List, ListItem, ListItemText, ListItemButton, Box } from '@mui/material';
+import LogoutIcon from '@mui/icons-material/Logout';
 import MenuIcon from '@mui/icons-material/Menu';
 import AssignmentReturnIcon from '@mui/icons-material/AssignmentReturn';
 import MenuBookIcon from '@mui/icons-material/MenuBook';
@@ -86,7 +87,7 @@ const LayoutWithDrawer: React.FC<{ children: React.ReactNode }> = ({ children })
             {showBackButton && (
               <ListItem disablePadding>
                 <ListItemButton component={Link} href="/" onClick={() => localStorage.setItem('authToken', "")}>
-                  <AssignmentReturnIcon sx={{ color: "#ffffff", marginRight: 2 }} />
+                  <LogoutIcon sx={{ color: "#ffffff", marginRight: 2 }} />
                   <ListItemText primary="Logout" primaryTypographyProps={{ sx: { color: "#ffffff" } }} />
                 </ListItemButton>
               </ListItem>
