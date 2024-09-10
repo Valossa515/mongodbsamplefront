@@ -7,6 +7,7 @@ import { TextField, Button, Container, Typography, Box } from '@mui/material';
 import clienteservice from '@/app/services/clienteService';
 
 const Login: React.FC = () => {
+  
   const validationSchema = Yup.object({
     email: Yup.string().email('Email inválido').required('Email é obrigatório'),
     password: Yup.string().required('Password é obrigatório'),
@@ -83,13 +84,9 @@ const Login: React.FC = () => {
             onChange={formik.handleChange}
             onBlur={formik.handleBlur}
             error={formik.touched.password && Boolean(formik.errors.password)}
-            helperText={formik.touched.password && formik.errors.password}
+            
+            helperText={(formik.touched.password && formik.errors.password) || formik.errors.password}
           />
-          {formik.errors.password && (
-            <Typography color="error" sx={{ mt: 2 }}>
-              {formik.errors.password}
-            </Typography>
-          )}
           <Button
             type="submit"
             fullWidth

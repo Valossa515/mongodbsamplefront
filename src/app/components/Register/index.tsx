@@ -6,10 +6,13 @@ import { TextField, Button, Container, Typography, Box, Paper } from '@mui/mater
 import clienteservice from '@/app/services/clienteService';
 
 const Register: React.FC = () => {
+
   const validationSchema = Yup.object({
-    name: Yup.string().required('Nome é obrigatório'),
+    name: Yup.string()
+      .matches(/^[a-zA-Z0-9]+$/, 'Nome deve conter apenas letras e dígitos')
+      .required('Nome é obrigatório'),
     email: Yup.string().email('Email inválido').required('Email é obrigatório'),
-    password: Yup.string().required('Password é obrigatório').min(6, 'Password deve ter pelo menos 6 caracteres'),
+    password: Yup.string().required('Password é obrigatório').min(8, 'Password deve ter pelo menos 6 caracteres'),
     confirmPassword: Yup.string()
       .oneOf([Yup.ref('password')], 'As senhas não coincidem')
       .required('Confirmação de senha é obrigatória'),
