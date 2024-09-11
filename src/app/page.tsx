@@ -22,10 +22,8 @@ const LoginPage: React.FC = () => {
     },
     validationSchema,
     onSubmit: async (values, { setSubmitting, setErrors }) => {
-      console.log('values', values);
       try {
         const response = await clienteservice.login(values.email, values.password);
-        console.log('response', response);
         if (response) {
           localStorage.setItem('authToken', `${response}`);
           window.location.href = '/';
@@ -39,7 +37,6 @@ const LoginPage: React.FC = () => {
       }
     },
   });
-  console.log(formik);
 
   const checkTokenValidity = () => {
     const token = localStorage.getItem('authToken');
@@ -56,7 +53,6 @@ const LoginPage: React.FC = () => {
 
   useEffect(() => {
     const isValid = checkTokenValidity();
-    console.log(isValid);
     if(isValid){
       window.location.href = '/home';
     }
