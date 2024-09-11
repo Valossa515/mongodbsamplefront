@@ -1,5 +1,4 @@
 "use client";
-
 import React, { useEffect, useState } from 'react';
 import { TextField, Button, Container, Typography, Box, Paper, FormHelperText } from '@mui/material';
 import clienteservice from '@/app/services/clienteService';
@@ -7,9 +6,8 @@ import { useFormik } from 'formik';
 import * as Yup from 'yup';
 
 const LoginPage: React.FC = () => {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [error, setError] = useState<string | null>(null);
+
+  const [error] = useState<string | null>(null);
 
   const validationSchema = Yup.object({
     email: Yup.string().email('Email inválido').required('Email é obrigatório'),

@@ -71,7 +71,7 @@ const Books: React.FC = () => {
     const handleAddBook = async (values : BookDTO) => {
         const today = new Date().toISOString().split('T')[0];
         let publishDate: Date;
-        console.log(values);
+        
         try {
             publishDate = new Date(values.Date);
 
@@ -95,7 +95,7 @@ const Books: React.FC = () => {
                     if (response && response.data) {
         
                         const books = response.data.Data || [];
-                        const totalCount = response.data.TotalCount || 0;
+                        setTotalCount(response.data.TotalCount || 0);
             
                         setBooks(books);
                         setTotalCount(totalCount);

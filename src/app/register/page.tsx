@@ -1,4 +1,3 @@
-import Books from "@/app/components/Books";
 import Typography from '@mui/material/Typography';
 import Register from "../components/Register";
 

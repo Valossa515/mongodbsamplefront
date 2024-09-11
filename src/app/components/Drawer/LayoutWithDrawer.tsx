@@ -1,5 +1,4 @@
 "use client";
-
 import { useState, useEffect } from 'react';
 import Link from "next/link";
 import { usePathname } from 'next/navigation'; // Importa o hook usePathname
@@ -8,7 +7,6 @@ import LogoutIcon from '@mui/icons-material/Logout';
 import MenuIcon from '@mui/icons-material/Menu';
 import AssignmentReturnIcon from '@mui/icons-material/AssignmentReturn';
 import MenuBookIcon from '@mui/icons-material/MenuBook';
-import { useRouter } from 'next/router';
 
 const LayoutWithDrawer: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [drawerOpen, setDrawerOpen] = useState(false);

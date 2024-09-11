@@ -39,7 +39,6 @@ const clienteservice = {
             if (!token) {
                 throw new Error('Token not found');
             }
-            console.log('Token:', token);
             const response = await axios.get(`${BACKEND_URL}books`, {
                 headers: {
                     Authorization: `Bearer ${token}`,
