@@ -88,7 +88,6 @@ const HomePage: React.FC = () => {
                   <Typography variant="body2">Autor: {book.Author}</Typography>
                   <Typography variant="body2">Categoria: {book.Category}</Typography>
                   <Typography variant="body2">Preço: R${book.Price.toFixed(2)}</Typography>
-                  <Typography variant="body2">Data: {format(parseISO(book.Date), 'dd/MM/yyyy')}</Typography>
                 </div>
               </div>
             ))}

@@ -1,7 +1,7 @@
 "use client";
 import { useState, useEffect } from 'react';
 import Link from "next/link";
-import { usePathname } from 'next/navigation'; // Importa o hook usePathname
+import { usePathname } from 'next/navigation';
 import { AppBar, Toolbar, IconButton, Typography, Drawer, List, ListItem, ListItemText, ListItemButton, Box } from '@mui/material';
 import LogoutIcon from '@mui/icons-material/Logout';
 import MenuIcon from '@mui/icons-material/Menu';
@@ -10,7 +10,7 @@ import MenuBookIcon from '@mui/icons-material/MenuBook';
 
 const LayoutWithDrawer: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [drawerOpen, setDrawerOpen] = useState(false);
-  const [showBackButton, setShowBackButton] = useState(true);
+  const [showBackButton, setShowBackButton] = useState(false);
   const [showBooksButton, setShowBooksButton] = useState(true);
   const pathname = usePathname();
 
@@ -22,13 +22,18 @@ const LayoutWithDrawer: React.FC<{ children: React.ReactNode }> = ({ children })
   };
 
   useEffect(() => {
-    setShowBackButton(pathname !== "/");
+    // Verifica se deve mostrar o botão "Voltar à Página Inicial"
+    if (pathname === "/home") {
+
+      setShowBackButton(false);
+    } else {
+      setShowBackButton(true);
+    }
     setShowBooksButton(pathname !== "/books");
   }, [pathname]);
 
   useEffect(() => {
-    if (localStorage.getItem('authToken') === "" 
-        || localStorage.getItem('authToken') === null) {
+    if (!localStorage.getItem('authToken')) {
       window.location.href = '/';
     }
   }, []);
@@ -81,15 +86,12 @@ const LayoutWithDrawer: React.FC<{ children: React.ReactNode }> = ({ children })
                 </ListItemButton>
               </ListItem>
             )}
-
-            {showBackButton && (
-              <ListItem disablePadding>
-                <ListItemButton component={Link} href="/" onClick={() => localStorage.setItem('authToken', "")}>
-                  <LogoutIcon sx={{ color: "#ffffff", marginRight: 2 }} />
-                  <ListItemText primary="Logout" primaryTypographyProps={{ sx: { color: "#ffffff" } }} />
-                </ListItemButton>
-              </ListItem>
-            )}
+            <ListItem disablePadding>
+              <ListItemButton component={Link} href="/" onClick={() => localStorage.setItem('authToken', "")}>
+                <LogoutIcon sx={{ color: "#ffffff", marginRight: 2 }} />
+                <ListItemText primary="Logout" primaryTypographyProps={{ sx: { color: "#ffffff" } }} />
+              </ListItemButton>
+            </ListItem>
           </List>
         </Box>
       </Drawer>
