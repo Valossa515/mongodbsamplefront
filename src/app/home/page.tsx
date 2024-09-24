@@ -5,7 +5,7 @@ import LayoutWithDrawer from '../components/Drawer/LayoutWithDrawer';
 import Slider from 'react-slick';
 import clienteservice from '../services/clienteService';
 import { BookDTO } from '../models/Book';
-import "slick-carousel/slick/slick.css"; 
+import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
 import { Box } from '@mui/material';
 import { format, parseISO } from 'date-fns';
@@ -20,30 +20,41 @@ const HomePage: React.FC = () => {
       return;
     }
 
-    const fetchBooks = async () => {
+    const fetchAllBooks = async () => {
+      setLoading(true);
+      let allBooks: BookDTO[] = [];
+      let page = 1;
+      let hasMoreBooks = true;
+
       try {
-        const response = await clienteservice.getBooks();
-        if (response && response.data && Array.isArray(response.data.Data)) {
-          setBooks(response.data.Data);
-          console.log("Livros carregados:", response.data.Data);
-        } else {
-          console.error("A resposta não é uma lista de livros:", response.data);
+        while (hasMoreBooks) {
+          const response = await clienteservice.getBooks(page);  // Assumindo que getBooks aceita um parâmetro de página
+          if (response && response.data && Array.isArray(response.data.Data)) {
+            allBooks = [...allBooks, ...response.data.Data];
+            page++;
+            // Verifica se ainda há mais livros para buscar (baseado na resposta da API)
+            hasMoreBooks = response.data.Data.length > 0;  // Ajuste conforme a API retorna dados
+          } else {
+            console.error("A resposta não é uma lista de livros:", response.data);
+            hasMoreBooks = false;  // Para evitar um loop infinito
+          }
         }
+        setBooks(allBooks);
       } catch (error) {
-        console.error("Error fetching books:", error);
+        console.error("Erro ao buscar os livros:", error);
       } finally {
         setLoading(false);
       }
     };
 
-    fetchBooks();
+    fetchAllBooks();
   }, []);
 
   const settings = {
     dots: true,
     infinite: true,
-    autoplay : true,
-    autoplaySpeed : 2000,
+    autoplay: true,
+    autoplaySpeed: 2000,
     speed: 1000,
     slidesToShow: 3,
     slidesToScroll: 1,
@@ -76,24 +87,21 @@ const HomePage: React.FC = () => {
         </Typography>
       ) : (
         books.length > 0 ? (
-        <Box sx ={{
-          maxWidth: '900px'
-        }}>
+          <Box sx={{ maxWidth: '900px' }}>
             <Slider {...settings}>
-            {books.map((book) => (
-              console.log(books),
-              <div key={book.Id} style={{ padding: '0 10px' }}>
-                <div style={{ border: '1px solid #ddd', padding: '16px', textAlign: 'center' }}>
-                  <Typography variant="h6">{book.BookName}</Typography>
-                  <Typography variant="body2">Autor: {book.Author}</Typography>
-                  <Typography variant="body2">Categoria: {book.Category}</Typography>
-                  <Typography variant="body2">Preço: R${book.Price.toFixed(2)}</Typography>
+              {books.map((book) => (
+                <div key={book.Id} style={{ padding: '0 10px' }}>
+                  <div style={{ border: '1px solid #ddd', padding: '16px', textAlign: 'center' }}>
+                    <Typography variant="h6">{book.BookName}</Typography>
+                    <Typography variant="body2">Autor: {book.Author}</Typography>
+                    <Typography variant="body2">Categoria: {book.Category}</Typography>
+                    <Typography variant="body2">Preço: R${book.Price.toFixed(2)}</Typography>
+                    <Typography variant="body2">Data de cadastro: {format(parseISO(book.Date), 'dd/MM/yyyy')}</Typography>
+                  </div>
                 </div>
-              </div>
-            ))}
-          </Slider>
-        </Box>
-        
+              ))}
+            </Slider>
+          </Box>
         ) : (
           <Typography variant="body1" className="text-lg text-gray-700 dark:text-gray-300">
             Nenhum livro disponível no momento.
