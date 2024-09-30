@@ -9,10 +9,13 @@ import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
 import { Box } from '@mui/material';
 import { format, parseISO } from 'date-fns';
+import useHttp from '../Hooks/useHttp';
 
 const HomePage: React.FC = () => {
   const [books, setBooks] = useState<BookDTO[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
+  const { request } = useHttp();
+  const clienteServiceInstance = clienteservice(request);
 
   useEffect(() => {
     if (!localStorage.getItem('authToken')) {
@@ -28,15 +31,14 @@ const HomePage: React.FC = () => {
 
       try {
         while (hasMoreBooks) {
-          const response = await clienteservice.getBooks(page);  // Assumindo que getBooks aceita um parâmetro de página
-          if (response && response.data && Array.isArray(response.data.Data)) {
-            allBooks = [...allBooks, ...response.data.Data];
+          const response = await clienteServiceInstance.getBooks(page);
+          if (response && response.Data && Array.isArray(response.Data)) {
+            allBooks = [...allBooks, ...response.Data];
             page++;
-            // Verifica se ainda há mais livros para buscar (baseado na resposta da API)
-            hasMoreBooks = response.data.Data.length > 0;  // Ajuste conforme a API retorna dados
+            hasMoreBooks = response.Data.length > 0;
           } else {
-            console.error("A resposta não é uma lista de livros:", response.data);
-            hasMoreBooks = false;  // Para evitar um loop infinito
+            console.error("A resposta não é uma lista de livros:", response?.Data);
+            hasMoreBooks = false;
           }
         }
         setBooks(allBooks);
@@ -51,12 +53,12 @@ const HomePage: React.FC = () => {
   }, []);
 
   const settings = {
-    dots: true,
-    infinite: true,
-    autoplay: true,
+    dots: books.length > 1,
+    infinite: books.length > 1,
+    autoplay: books.length > 1,
     autoplaySpeed: 2000,
     speed: 1000,
-    slidesToShow: 3,
+    slidesToShow: Math.min(3, books.length),
     slidesToScroll: 1,
     responsive: [
       {
@@ -87,11 +89,11 @@ const HomePage: React.FC = () => {
         </Typography>
       ) : (
         books.length > 0 ? (
-          <Box sx={{ maxWidth: '900px' }}>
+          <Box sx={{ maxWidth: '900px', margin: '0 auto' }}> {/* Centraliza o slider */}
             <Slider {...settings}>
               {books.map((book) => (
                 <div key={book.Id} style={{ padding: '0 10px' }}>
-                  <div style={{ border: '1px solid #ddd', padding: '16px', textAlign: 'center' }}>
+                  <div style={{ border: '1px solid #ddd', padding: '16px', textAlign: 'center', minHeight: '200px' }}>
                     <Typography variant="h6">{book.BookName}</Typography>
                     <Typography variant="body2">Autor: {book.Author}</Typography>
                     <Typography variant="body2">Categoria: {book.Category}</Typography>

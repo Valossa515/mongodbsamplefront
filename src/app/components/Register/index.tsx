@@ -3,16 +3,20 @@ import React from 'react';
 import { useFormik } from 'formik';
 import * as Yup from 'yup';
 import { TextField, Button, Container, Typography, Box, Paper } from '@mui/material';
-import clienteservice from '@/app/services/clienteService';
+import clienteservice, { RegisterResponse } from '@/app/services/clienteService';
+import useHttp from '@/app/Hooks/useHttp';
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 const Register: React.FC = () => {
-
+  const { request } = useHttp();
+  const clienteServiceInstance = clienteservice(request);
   const validationSchema = Yup.object({
     name: Yup.string()
       .matches(/^[a-zA-Z0-9]+$/, 'Nome deve conter apenas letras e dígitos')
       .required('Nome é obrigatório'),
     email: Yup.string().email('Email inválido').required('Email é obrigatório'),
-    password: Yup.string().required('Password é obrigatório').min(8, 'Password deve ter pelo menos 6 caracteres'),
+    password: Yup.string().required('Password é obrigatório').min(8, 'Password deve ter pelo menos 8 caracteres'),
     confirmPassword: Yup.string()
       .oneOf([Yup.ref('password')], 'As senhas não coincidem')
       .required('Confirmação de senha é obrigatória'),
@@ -26,22 +30,26 @@ const Register: React.FC = () => {
       confirmPassword: '',
     },
     validationSchema,
-    onSubmit: async (values, { setSubmitting, setErrors }) => {
+    onSubmit: async (values, { setSubmitting }) => {
       try {
-        const response = await clienteservice.register(
+        const response: RegisterResponse = await clienteServiceInstance.register(
           values.name,
           values.email,
           values.password,
           values.confirmPassword
         );
 
-        if (response && response.Sucesso) {
+        if (response.Sucesso) {
           window.location.href = '/';
         } else {
-          setErrors({ email: response?.Mensagem || 'Falha no registro. Tente novamente.' });
+          toast.error(response.Mensagem);
         }
       } catch (error) {
-        setErrors({ email: 'Ocorreu um erro. Por favor, tente novamente.' });
+        if (error instanceof Error) {
+          toast.error(`Erro: ${error.message}. Por favor, tente novamente. Usuário já existente`);
+        } else {
+          toast.error('Ocorreu um erro inesperado. Por favor, tente novamente.');
+        }
       } finally {
         setSubmitting(false);
       }
@@ -121,7 +129,7 @@ const Register: React.FC = () => {
               helperText={formik.touched.confirmPassword && formik.errors.confirmPassword}
               sx={{ marginBottom: 2 }}
             />
-            
+
             <Button
               type="submit"
               fullWidth
@@ -139,9 +147,27 @@ const Register: React.FC = () => {
             >
               Registrar
             </Button>
+
+            {/* Botão Voltar */}
+            <Button
+              fullWidth
+              variant="contained"
+              color="primary"
+              onClick={() => window.location.href = '/'}
+              sx={{
+                mb: 2,
+                backgroundColor: '#1976d2',
+                ':hover': {
+                  backgroundColor: '#1565c0',
+                },
+              }}
+            >
+              Voltar
+            </Button>
           </form>
         </Box>
       </Paper>
+      <ToastContainer />
     </Container>
   );
 };

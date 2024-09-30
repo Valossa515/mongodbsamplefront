@@ -6,6 +6,7 @@ import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import useHttp from '@/app/Hooks/useHttp';
 
 interface TableProps {
     books: BookDTO[];
@@ -21,7 +22,9 @@ const TableComponent: React.FC<TableProps> = ({ books, SetCurrentBook, setBooks 
     const [page, setPage] = useState(1);
     const [pageSize] = useState(10);
     const [totalCount, setTotalCount] = useState(0);
-
+    const { request } = useHttp();
+    const clienteServiceInstance = clienteservice(request);
+    
     function formatDateInput(value: string) {
         return value.split('T')[0];
     }
@@ -63,7 +66,7 @@ const TableComponent: React.FC<TableProps> = ({ books, SetCurrentBook, setBooks 
     const handleConfirmDelete = async () => {
         if (deleteId) {
             try {
-                await clienteservice.deleteBooks(deleteId);
+                await clienteServiceInstance.deleteBooks(deleteId);
                 setBooks((prevBooks) => prevBooks.filter((book) => book.Id !== deleteId));
                 setShowToastError(true);
             } catch (error) {
@@ -75,22 +78,21 @@ const TableComponent: React.FC<TableProps> = ({ books, SetCurrentBook, setBooks 
 
     const fetchBooks = async (page: number, pageSize: number) => {
         try {
-            const response = await clienteservice.getBooks(page, pageSize);
-            
-            if (response && response.data) {
-
-                const books = response.data.Data || [];
-                const totalCount = response.data.TotalCount || 0;
-    
-                setBooks(books);
-                setTotalCount(totalCount);
-            } else {
-                console.error('Invalid response format:', response);
-            }
+          const response = await clienteServiceInstance.getBooks(page, pageSize);
+      
+          if (response) {
+            const books = response.Data || [];
+            const totalCount = response.TotalCount || 0;
+      
+            setBooks(books);
+            setTotalCount(totalCount);
+          } else {
+            console.error('Invalid response format:', response);
+          }
         } catch (error) {
-            console.error("Error fetching books:", error);
+          console.error("Error fetching books:", error);
         }
-    };
+      };
 
     const handlePageChange = (event: React.ChangeEvent<unknown>, value: number) => {
         setPage(value);

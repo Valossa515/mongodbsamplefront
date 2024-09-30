@@ -22,7 +22,6 @@ const LayoutWithDrawer: React.FC<{ children: React.ReactNode }> = ({ children })
   };
 
   useEffect(() => {
-    // Verifica se deve mostrar o botão "Voltar à Página Inicial"
     if (pathname === "/home") {
 
       setShowBackButton(false);

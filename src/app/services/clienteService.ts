@@ -1,137 +1,138 @@
-import axios from "axios";
+import axios, { AxiosRequestConfig } from "axios";
 import { BookDTO } from "../models/Book";
 import { BACKEND_URL } from "../utils/system";
-interface LoginResponse {
-    token: string;
-    id: number;
+
+interface GetBooksResponse {
+  Data: BookDTO[]; // Array of BookDTOs
+  TotalCount: number; // Total count of books
 }
 
-interface RegisterResponse {
-    Id: string;
-    Sucesso: boolean;
-    Mensagem: string;
-    Status: number;
+export interface RegisterResponse {
+  Sucesso: boolean;
+  Mensagem: string;
 }
 
-const clienteservice = {
-    createBook: async (book: BookDTO) => {
-        try {
-            const token = localStorage.getItem('authToken');
-            if (!token) {
-                throw new Error('Token not found');
-            }
-            const response = await axios.post(`${BACKEND_URL}books/cadastro`, book, {
-                headers: {
-                    "Content-Type": "application/json",
-                    Authorization: `Bearer ${token}`,
-                },
-                maxRedirects: 0
-            });
-            return response.data;
-        } catch (e) {
-            console.error(e);
-        }
-    },
+export interface LoginResponse {
+  Result: {
+    Token: string; // Token format
+    Success: boolean;
+    Message: string;
+  };
+}
 
-    getBooks: async (page = 1, pageSize = 10) => {
-        try {
-            const token = localStorage.getItem('authToken');
-            if (!token) {
-                throw new Error('Token not found');
-            }
-            const response = await axios.get(`${BACKEND_URL}books`, {
-                headers: {
-                    Authorization: `Bearer ${token}`,
-                },
-                params: {
-                    page: page,
-                    pageSize: pageSize
-                },
-                maxRedirects: 0
-            });
-    
-            return response;
-        } catch (e) {
-            console.error("Error fetching books:", e);
-            throw e;
-        }
-    },
+// Modify clienteservice to not use hooks directly
+const clienteservice = (
+  request: <T>(url: string, config: AxiosRequestConfig) => Promise<T | null>
+) => {
 
-    updateBooks: async (id: string, book: BookDTO) => {
-        try
-        {
-            const token = localStorage.getItem('authToken');
-            if (!token) {
-                throw new Error('Token not found');
-            }
-            const response = await axios.put(`${BACKEND_URL}books/${id}`, book, {
-                headers: {
-                    "Content-Type": "application/json",
-                    Authorization: `Bearer ${token}`,
-                },
-                maxRedirects: 0
-            });
-            return response.data;
-        }
-        catch(e)
-        {
-            console.error(e);
-        }
-    },
+  const createBook = async (book: BookDTO): Promise<void> => {
+    const token = localStorage.getItem("authToken");
+    console.log("Token:", token);
+    await request(`${BACKEND_URL}books/cadastro`, {
+      method: "POST",
+      data: book,
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": token ? `Bearer ${token}` : undefined
+      },
+    });
+  };
 
-    deleteBooks: async (id: string) => {
-        try
-        {
-            const token = localStorage.getItem('authToken');
-            if (!token) {
-                throw new Error('Token not found');
-            }
-            const response = await axios.delete(`${BACKEND_URL}books/${id}`, {
-                headers: {
-                    "Content-Type": "application/json",
-                    Authorization: `Bearer ${token}`,
-                },
-                maxRedirects: 0
-            });
-            return response.data;
-        }
-        catch(e)
-        {
-            console.error(e);
-        }
-    },
-
-    login: async (email: string, password: string): Promise<LoginResponse | null>  => {
-        try {
-            const response = await axios.post(`${BACKEND_URL}users/login`, {
-              email,
-              password,
-              headers: {
-                'Content-Type': 'application/json',
-              },
-              
-            }).then(response => response.data);
-            return response.Result.Token;
-          } catch (error) {
-            console.error('Error:', error);
-            return null;
-          }
-    },
-
-    register: async (name: string, email: string, password: string, confirmPassword: string): Promise<RegisterResponse | null> => {
-        try {
-          const response = await axios.post(`${BACKEND_URL}users/register`, {
-            name,
-            email,
-            password,
-            confirmPassword,
-          }).then(response => response.data);;
-          return response.Result;
-        } catch (error) {
-          console.error('Error:', error);
-          return null;
-        }
+  const getBooks = async (
+    page = 1,
+    pageSize = 10
+  ): Promise<GetBooksResponse | null> => {
+    const token = localStorage.getItem("authToken");
+    const response = await request<GetBooksResponse>(
+      `${BACKEND_URL}books?page=${page}&pageSize=${pageSize}`,
+      {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": token ? `Bearer ${token}` : undefined
+        },
       }
+    );
+    return response;
+  };
+
+  const updateBooks = async (id: string, book: BookDTO): Promise<void> => {
+    const token = localStorage.getItem("authToken");
+    await request(`${BACKEND_URL}books/${id}`, {
+      method: "PUT",
+      data: book,
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": token ? `Bearer ${token}` : undefined
+      },
+    });
+  };
+
+  const deleteBooks = async (id: string): Promise<void> => {
+    const token = localStorage.getItem("authToken");
+    await request(`${BACKEND_URL}books/${id}`, {
+      method: "DELETE",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": token ? `Bearer ${token}` : undefined
+      },
+    });
+  };
+
+  const login = async (
+    email: string,
+    password: string
+  ): Promise<LoginResponse | null> => {
+    try {
+      const response = await request<LoginResponse>(`${BACKEND_URL}users/login`, {
+        method: "POST",
+        data: { email, password },
+        headers: { "Content-Type": "application/json" },
+      });
+
+      if (response && response.Result && response.Result.Token) {
+        localStorage.setItem("authToken", response.Result.Token);
+        return response;
+      } else {
+        throw new Error("Login falhou. Token não encontrado.");
+      }
+    } catch (error) {
+      console.error("Erro inesperado:", error);
+      return null;
+    }
+  };
+
+  const register = async (
+    name: string,
+    email: string,
+    password: string,
+    confirmPassword: string
+  ): Promise<RegisterResponse> => {
+    try {
+      const response = await request<{ Result: RegisterResponse }>(`${BACKEND_URL}users/register`, {
+        method: "POST",
+        data: { name, email, password, confirmPassword },
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+  
+      console.log("Resposta da API de registro:", response);
+  
+      const result = response?.Result;
+  
+      if (!result || !result.Sucesso) {
+        return { Sucesso: false, Mensagem: "Falha no registro. Tente novamente." };
+      }
+  
+      return result;
+    } catch (error) {
+      console.error("Erro ao registrar o usuário:", error);
+      return { Sucesso: false, Mensagem: "Ocorreu um erro inesperado. Tente novamente." };
+    }
+  };
+
+  return { createBook, getBooks, updateBooks, deleteBooks, login, register };
 };
 
 export default clienteservice;

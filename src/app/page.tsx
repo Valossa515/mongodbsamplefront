@@ -1,12 +1,14 @@
 "use client";
 import React, { useEffect, useState } from 'react';
-import { TextField, Button, Container, Typography, Box, Paper, FormHelperText } from '@mui/material';
+import { TextField, Button, Container, Typography, Box, Paper } from '@mui/material';
 import clienteservice from '@/app/services/clienteService';
 import { useFormik } from 'formik';
 import * as Yup from 'yup';
+import useHttp from './Hooks/useHttp';
 
 const LoginPage: React.FC = () => {
-
+  const { request } = useHttp();
+  const clienteServiceInstance = clienteservice(request);
   const [error] = useState<string | null>(null);
 
   const validationSchema = Yup.object({
@@ -15,7 +17,6 @@ const LoginPage: React.FC = () => {
   });
 
   const formik = useFormik({
-    enableReinitialize: true,
     initialValues: {
       email: '',
       password: '',
@@ -23,15 +24,18 @@ const LoginPage: React.FC = () => {
     validationSchema,
     onSubmit: async (values, { setSubmitting, setErrors }) => {
       try {
-        const response = await clienteservice.login(values.email, values.password);
-        if (response) {
-          localStorage.setItem('authToken', `${response}`);
-          window.location.href = '/';
+        const response = await clienteServiceInstance.login(values.email, values.password);
+
+        // Ajuste para pegar o token diretamente da resposta
+        if (response && response.Result.Token) {
+          localStorage.setItem("authToken", response.Result.Token);
+          window.location.href = "/"; // Redireciona para a página inicial após o login
         } else {
-          setErrors({ password: 'Login falhou. Verifique seu email e senha.' });
+          setErrors({ password: "Login falhou. Verifique seu email e senha." });
         }
       } catch (error) {
-        setErrors({ password: 'Ocorreu um erro. Por favor, tente novamente.' });
+        console.error("Erro ao fazer login:", error);
+        setErrors({ password: "Ocorreu um erro. Por favor, tente novamente." });
       } finally {
         setSubmitting(false);
       }
@@ -40,21 +44,31 @@ const LoginPage: React.FC = () => {
 
   const checkTokenValidity = () => {
     const token = localStorage.getItem('authToken');
-
     if (!token) {
+      console.error('Token não encontrado no localStorage');
       return false;
     }
 
-    const tokenPayload = JSON.parse(atob(token.split('.')[1]));
-    const isTokenExpired = tokenPayload.exp < Date.now() / 1000;
+    const parts = token.split('.');
+    if (parts.length !== 3) {
+      console.error('Formato de token inválido');
+      return false;
+    }
 
-    return !isTokenExpired;
+    try {
+      const tokenPayload = JSON.parse(atob(parts[1]));
+      const isTokenExpired = tokenPayload.exp < Date.now() / 1000;
+      return !isTokenExpired;
+    } catch (error) {
+      console.error('Erro ao decodificar o token:', error);
+      return false;
+    }
   };
 
   useEffect(() => {
     const isValid = checkTokenValidity();
-    if(isValid){
-      window.location.href = '/home';
+    if (isValid) {
+      window.location.href = '/home'; // Redireciona se o token for válido
     }
   }, []);
 
@@ -85,8 +99,7 @@ const LoginPage: React.FC = () => {
             Login
           </Typography>
 
-          <form onSubmit={formik.handleSubmit}
-          >
+          <form onSubmit={formik.handleSubmit}>
             <TextField
               margin="normal"
               required
@@ -120,7 +133,7 @@ const LoginPage: React.FC = () => {
               helperText={formik.touched.password && formik.errors.password}
               sx={{ marginBottom: 2 }}
             />
-          
+
             {error && (
               <Typography color="error" sx={{ mt: 2 }}>
                 {error}

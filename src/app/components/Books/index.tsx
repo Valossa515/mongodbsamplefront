@@ -1,15 +1,18 @@
-"use client";
-import React, { useEffect } from 'react';
-import { BookDTO } from '@/app/models/Book';
-import { useState } from 'react';
+"use client"
 import clienteservice from '@/app/services/clienteService';
+import React, { useEffect, useState } from 'react';
+import { BookDTO } from '@/app/models/Book';
 import BookForm from '../Form';
 import Table from '../Table';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { Container, Grid, Paper } from '@mui/material';
+import useHttp from '@/app/Hooks/useHttp';
 
 const Books: React.FC = () => {
+    const { request } = useHttp();
+    const clienteServiceInstance = clienteservice(request);
+
     const [currentBook, setCurrentBook] = useState<BookDTO>({
         Id: '',
         BookName: '',
@@ -27,51 +30,51 @@ const Books: React.FC = () => {
 
     useEffect(() => {
         if (showToast === 'add') {
-          toast.success("Book added successfully", {
-            onClose: () => setShowToast(''),
-            position: "top-right",
-            autoClose: 2000,
-            pauseOnFocusLoss: false,
-          });
+            toast.success("Book added successfully", {
+                onClose: () => setShowToast(''),
+                position: "top-right",
+                autoClose: 2000,
+                pauseOnFocusLoss: false,
+            });
         }
         if (showToast === 'update') {
             toast.success("Book updated successfully", {
-              onClose: () => setShowToast(''),
-              position: "top-right",
-              autoClose: 2000,
-              pauseOnFocusLoss: false,
+                onClose: () => setShowToast(''),
+                position: "top-right",
+                autoClose: 2000,
+                pauseOnFocusLoss: false,
             });
         }
         if (showToast === 'erroadd') {
             toast.error("Error adding book", {
-              onClose: () => setShowToast(''),
-              position: "top-right",
-              autoClose: 2000,
-              pauseOnFocusLoss: false,
+                onClose: () => setShowToast(''),
+                position: "top-right",
+                autoClose: 2000,
+                pauseOnFocusLoss: false,
             });
-          }
-          if (showToast === 'errorupdate') {
+        }
+        if (showToast === 'errorupdate') {
             toast.error("Error updating book", {
-              onClose: () => setShowToast(''),
-              position: "top-right",
-              autoClose: 2000,
-              pauseOnFocusLoss: false,
+                onClose: () => setShowToast(''),
+                position: "top-right",
+                autoClose: 2000,
+                pauseOnFocusLoss: false,
             });
-          }
-          if (showToast === 'fetch') {
+        }
+        if (showToast === 'fetch') {
             toast.error("Error fetching books", {
-              onClose: () => setShowToast(''),
-              position: "top-right",
-              autoClose: 2000,
-              pauseOnFocusLoss: false,
+                onClose: () => setShowToast(''),
+                position: "top-right",
+                autoClose: 2000,
+                pauseOnFocusLoss: false,
             });
-          }
-      }, [showToast]);
+        }
+    }, [showToast]);
 
-    const handleAddBook = async (values : BookDTO) => {
+    const handleAddBook = async (values: BookDTO) => {
         const today = new Date().toISOString().split('T')[0];
         let publishDate: Date;
-        
+
         try {
             publishDate = new Date(values.Date);
 
@@ -88,25 +91,6 @@ const Books: React.FC = () => {
 
             const formattedDate = publishDate.toISOString();
 
-            const fetchBooks = async (page: number, pageSize: number) => {
-                try {
-                    const response = await clienteservice.getBooks(page, pageSize);
-                    
-                    if (response && response.data) {
-        
-                        const books = response.data.Data || [];
-                        setTotalCount(response.data.TotalCount || 0);
-            
-                        setBooks(books);
-                        setTotalCount(totalCount);
-                    } else {
-                        console.error('Invalid response format:', response);
-                    }
-                } catch (error) {
-                    console.error("Error fetching books:", error);
-                }
-            };
-
             if (currentBook.Id === '') {
                 try {
                     const bookData: BookDTO = {
@@ -118,15 +102,10 @@ const Books: React.FC = () => {
                         Date: formattedDate
                     };
 
-                    await clienteservice.createBook(bookData)
-                    .then((response) => {
-                        console.log(response);
-                        if(response) {
-                            setShowToast('add');
-                        }
-                        else{
-                            setShowToast('erroadd');
-                        }
+                    await clienteServiceInstance.createBook(bookData).then(() => {
+                        setShowToast('add');
+                    }).catch(() => {
+                        setShowToast('erroadd');
                     });
 
                     setCurrentBook({
@@ -137,6 +116,7 @@ const Books: React.FC = () => {
                         Author: '',
                         Date: new Date().toISOString().split('T')[0]
                     });
+
                     fetchBooks(page, pageSize);
 
                 } catch (error) {
@@ -154,7 +134,7 @@ const Books: React.FC = () => {
                         Date: formattedDate
                     };
 
-                    await clienteservice.updateBooks(Id, bookData);
+                    await clienteServiceInstance.updateBooks(Id, bookData);
                     setBooks([...books, bookData]);
 
                     setCurrentBook({
@@ -178,12 +158,12 @@ const Books: React.FC = () => {
 
     const fetchBooks = async (page: number, pageSize: number) => {
         try {
-            const response = await clienteservice.getBooks(page, pageSize);
-            
-            if (response && response.data) {
-                const books = response.data.Data || [];
-                const totalCount = response.data.TotalCount || 0;
-    
+            const response = await clienteServiceInstance.getBooks(page, pageSize);
+
+            if (response) {
+                const books = response.Data || [];
+                const totalCount = response.TotalCount || 0;
+
                 setBooks(books);
                 setTotalCount(totalCount);
             } else {
@@ -191,18 +171,19 @@ const Books: React.FC = () => {
             }
         } catch (error) {
             console.error("Error fetching books:", error);
+            setShowToast('fetch');
         }
     };
 
     useEffect(() => {
-        if(localStorage.getItem('authToken') !== "" && localStorage.getItem('authToken') !== null) {
+        if (localStorage.getItem('authToken') !== "" && localStorage.getItem('authToken') !== null) {
             fetchBooks(page, pageSize);
         }
     }, []);
 
     return (
         <Container maxWidth="md" style={{ padding: '2rem 0' }}>
-            <ToastContainer pauseOnHover={false} draggable={false} autoClose={0}/>
+            <ToastContainer pauseOnHover={false} draggable={false} autoClose={0} />
             <Paper elevation={3} style={{ padding: '2rem', borderRadius: '8px' }}>
                 <Grid container spacing={3}>
                     <Grid item xs={12}>
