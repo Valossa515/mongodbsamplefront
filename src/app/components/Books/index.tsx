@@ -178,8 +178,7 @@ const Books: React.FC = () => {
     useEffect(() => {
         if (localStorage.getItem('authToken') !== "" && localStorage.getItem('authToken') !== null) {
             fetchBooks(page, pageSize);
-        }
-    }, []);
+        }}, []);
 
     return (
         <Container maxWidth="md" style={{ padding: '2rem 0' }}>

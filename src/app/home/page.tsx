@@ -89,16 +89,54 @@ const HomePage: React.FC = () => {
         </Typography>
       ) : (
         books.length > 0 ? (
-          <Box sx={{ maxWidth: '900px', margin: '0 auto' }}> {/* Centraliza o slider */}
+          <Box
+            sx={{
+              maxWidth: '900px',
+              margin: '0 auto',
+              position: 'relative',
+              overflow: 'hidden',
+            }}
+          >
             <Slider {...settings}>
               {books.map((book) => (
-                <div key={book.Id} style={{ padding: '0 10px' }}>
-                  <div style={{ border: '1px solid #ddd', padding: '16px', textAlign: 'center', minHeight: '200px' }}>
-                    <Typography variant="h6">{book.BookName}</Typography>
+                <div key={book.Id} style={{ padding: '10px' }}>
+                  <div
+                    style={{
+                      border: '1px solid #ddd',
+                      padding: '16px',
+                      textAlign: 'center',
+                      minHeight: '200px',
+                      minWidth: '200px',
+                      borderRadius: '8px',
+                      position: 'relative',
+                      backgroundImage: 'url(/assets/images/book-background.jpg)',
+                      backgroundSize: 'cover',
+                      backgroundPosition: 'center',
+                      backgroundRepeat: 'no-repeat',
+                      margin: '0 10px',
+                    }}
+                  >
+                    <Typography
+                      variant="h5"
+                      style={{
+                        textAlign: 'center', 
+                        wordWrap: 'break-word', 
+                        overflow: 'hidden', 
+                        textOverflow: 'ellipsis', 
+                        maxHeight: '60px', 
+                        display: '-webkit-box', 
+                        WebkitLineClamp: 2, 
+                        WebkitBoxOrient: 'vertical',
+                      }}
+                    >
+                      {book.BookName}
+                    </Typography>
                     <Typography variant="body2">Autor: {book.Author}</Typography>
                     <Typography variant="body2">Categoria: {book.Category}</Typography>
                     <Typography variant="body2">Preço: R${book.Price.toFixed(2)}</Typography>
-                    <Typography variant="body2">Data de cadastro: {format(parseISO(book.Date), 'dd/MM/yyyy')}</Typography>
+                    <Typography variant="body2">
+                      Data de cadastro: {format(parseISO(book.Date), 'dd/MM/yyyy')}
+                    </Typography>
                   </div>
                 </div>
               ))}
