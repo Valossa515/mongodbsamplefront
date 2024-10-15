@@ -1,10 +1,16 @@
 import axios, { AxiosRequestConfig } from "axios";
 import { BookDTO } from "../models/Book";
 import { BACKEND_URL } from "../utils/system";
+import { ReservationDTO } from "../models/Reservation";
 
 interface GetBooksResponse {
   Data: BookDTO[]; // Array of BookDTOs
   TotalCount: number; // Total count of books
+}
+
+interface GetReservationsResponse {
+    Data: ReservationDTO[];
+    TotalCount: number;
 }
 
 export interface RegisterResponse {
@@ -38,6 +44,18 @@ const clienteservice = (
     });
   };
 
+  const createReservation = async (reservation: ReservationDTO): Promise<void> => {
+      const token = localStorage.getItem("authToken");
+      await request(`${BACKEND_URL}reservations/cadastro`, {
+          method: "POST",
+          data: reservation,
+          headers: {
+              "Content-Type": "application/json",
+              "Authorization": token ? `Bearer ${token}` : undefined
+          },
+      });
+  };
+
   const getBooks = async (
     page = 1,
     pageSize = 10
@@ -56,6 +74,24 @@ const clienteservice = (
     return response;
   };
 
+  const getReservations = async (
+    page = 1,
+    pageSize = 10
+  ): Promise<GetReservationsResponse | null> => {
+      const token = localStorage.getItem("authToken");
+      const response = await request<GetReservationsResponse>(
+          `${BACKEND_URL}reservations?page=${page}&pageSize=${pageSize}`,
+          {
+              method: "GET",
+              headers: {
+                  "Content-Type": "application/json",
+                  "Authorization": token ? `Bearer ${token}` : undefined
+              },
+          }
+      );
+      return response;
+  };
+
   const updateBooks = async (id: string, book: BookDTO): Promise<void> => {
     const token = localStorage.getItem("authToken");
     await request(`${BACKEND_URL}books/${id}`, {
@@ -67,6 +103,18 @@ const clienteservice = (
       },
     });
   };
+
+  const updateReservations = async (id: string, reservation: ReservationDTO): Promise<void> => {
+      const token = localStorage.getItem("authToken");
+      await request(`${BACKEND_URL}reservations/devolucao/${id}`, {
+          method: "PUT",
+          data: reservation,
+          headers: {
+              "Content-Type": "application/json",
+              "Authorization": token ? `Bearer ${token}` : undefined
+          },
+      });
+  }
 
   const deleteBooks = async (id: string): Promise<void> => {
     const token = localStorage.getItem("authToken");
@@ -132,7 +180,7 @@ const clienteservice = (
     }
   };
 
-  return { createBook, getBooks, updateBooks, deleteBooks, login, register };
+  return { createBook, createReservation, getBooks, updateBooks, deleteBooks, login, register, getReservations, updateReservations };
 };
 
 export default clienteservice;

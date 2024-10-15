@@ -10,8 +10,6 @@ import MenuBookIcon from '@mui/icons-material/MenuBook';
 
 const LayoutWithDrawer: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [drawerOpen, setDrawerOpen] = useState(false);
-  const [showBackButton, setShowBackButton] = useState(false);
-  const [showBooksButton, setShowBooksButton] = useState(true);
   const pathname = usePathname();
 
   const toggleDrawer = (open: boolean) => (event: React.KeyboardEvent | React.MouseEvent) => {
@@ -20,16 +18,6 @@ const LayoutWithDrawer: React.FC<{ children: React.ReactNode }> = ({ children })
     }
     setDrawerOpen(open);
   };
-
-  useEffect(() => {
-    if (pathname === "/home") {
-
-      setShowBackButton(false);
-    } else {
-      setShowBackButton(true);
-    }
-    setShowBooksButton(pathname !== "/books");
-  }, [pathname]);
 
   useEffect(() => {
     if (!localStorage.getItem('authToken')) {
@@ -69,7 +57,15 @@ const LayoutWithDrawer: React.FC<{ children: React.ReactNode }> = ({ children })
             Menu
           </Typography>
           <List onClick={toggleDrawer(false)} onKeyDown={toggleDrawer(false)}>
-            {showBooksButton && (
+            {pathname !== "/home" && (
+              <ListItem disablePadding>
+                <ListItemButton component={Link} href="/home">
+                  <AssignmentReturnIcon sx={{ color: "#ffffff", marginRight: 2 }} />
+                  <ListItemText primary="Ir para Home" primaryTypographyProps={{ sx: { color: "#ffffff" } }} />
+                </ListItemButton>
+              </ListItem>
+            )}
+            {pathname !== "/books" && (
               <ListItem disablePadding>
                 <ListItemButton component={Link} href="/books">
                   <MenuBookIcon sx={{ color: "#ffffff", marginRight: 2 }} />
@@ -77,11 +73,11 @@ const LayoutWithDrawer: React.FC<{ children: React.ReactNode }> = ({ children })
                 </ListItemButton>
               </ListItem>
             )}
-            {showBackButton && (
+            {pathname !== "/reservations" && (
               <ListItem disablePadding>
-                <ListItemButton component={Link} href="/">
-                  <AssignmentReturnIcon sx={{ color: "#ffffff", marginRight: 2 }} />
-                  <ListItemText primary="Voltar à Página Inicial" primaryTypographyProps={{ sx: { color: "#ffffff" } }} />
+                <ListItemButton component={Link} href="/reservations">
+                  <MenuBookIcon sx={{ color: "#ffffff", marginRight: 2 }} />
+                  <ListItemText primary="Ir para Reservas" primaryTypographyProps={{ sx: { color: "#ffffff" } }} />
                 </ListItemButton>
               </ListItem>
             )}
