@@ -9,8 +9,8 @@ interface GetBooksResponse {
 }
 
 interface GetReservationsResponse {
-    Data: ReservationDTO[];
-    TotalCount: number;
+  Data: ReservationDTO[];
+  TotalCount: number;
 }
 
 export interface RegisterResponse {
@@ -45,15 +45,15 @@ const clienteservice = (
   };
 
   const createReservation = async (reservation: ReservationDTO): Promise<void> => {
-      const token = localStorage.getItem("authToken");
-      await request(`${BACKEND_URL}reservations/cadastro`, {
-          method: "POST",
-          data: reservation,
-          headers: {
-              "Content-Type": "application/json",
-              "Authorization": token ? `Bearer ${token}` : undefined
-          },
-      });
+    const token = localStorage.getItem("authToken");
+    await request(`${BACKEND_URL}reservations/cadastro`, {
+      method: "POST",
+      data: reservation,
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": token ? `Bearer ${token}` : undefined
+      },
+    });
   };
 
   const getBooks = async (
@@ -61,35 +61,60 @@ const clienteservice = (
     pageSize = 10
   ): Promise<GetBooksResponse | null> => {
     const token = localStorage.getItem("authToken");
-    const response = await request<GetBooksResponse>(
-      `${BACKEND_URL}books?page=${page}&pageSize=${pageSize}`,
-      {
-        method: "GET",
-        headers: {
-          "Content-Type": "application/json",
-          "Authorization": token ? `Bearer ${token}` : undefined
-        },
+    try {
+      const response = await request<GetBooksResponse>(
+        `${BACKEND_URL}books?page=${page}&pageSize=${pageSize}`,
+        {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+            "Authorization": token ? `Bearer ${token}` : undefined,
+          },
+        }
+      );
+
+      return response;
+    } catch (error: any) {
+      // Verifica se o erro é 401 (não autorizado)
+      if (error.response && error.response.status === 401) {
+        // Redireciona para a página de erro 401
+        window.location.href = "/error?statusCode=401";
+      } else {
+        // Caso outro erro ocorra, você pode lidar aqui
+        console.error("Ocorreu um erro ao buscar os livros:", error);
       }
-    );
-    return response;
+      return null;
+    }
   };
 
   const getReservations = async (
     page = 1,
     pageSize = 10
   ): Promise<GetReservationsResponse | null> => {
+    try {
       const token = localStorage.getItem("authToken");
       const response = await request<GetReservationsResponse>(
-          `${BACKEND_URL}reservations?page=${page}&pageSize=${pageSize}`,
-          {
-              method: "GET",
-              headers: {
-                  "Content-Type": "application/json",
-                  "Authorization": token ? `Bearer ${token}` : undefined
-              },
-          }
+        `${BACKEND_URL}reservations?page=${page}&pageSize=${pageSize}`,
+        {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+            "Authorization": token ? `Bearer ${token}` : undefined
+          },
+        }
       );
       return response;
+    }
+    catch (error: any) {
+      if (error.response && error.response.status === 401) {
+        // Redireciona para a página de erro 401
+        window.location.href = "/error?statusCode=401";
+      } else {
+        // Caso outro erro ocorra, você pode lidar aqui
+        console.error("Ocorreu um erro ao buscar as reservas:", error);
+      }
+      return null;
+    }
   };
 
   const updateBooks = async (id: string, book: BookDTO): Promise<void> => {
@@ -105,15 +130,15 @@ const clienteservice = (
   };
 
   const updateReservations = async (id: string, reservation: ReservationDTO): Promise<void> => {
-      const token = localStorage.getItem("authToken");
-      await request(`${BACKEND_URL}reservations/devolucao/${id}`, {
-          method: "PUT",
-          data: reservation,
-          headers: {
-              "Content-Type": "application/json",
-              "Authorization": token ? `Bearer ${token}` : undefined
-          },
-      });
+    const token = localStorage.getItem("authToken");
+    await request(`${BACKEND_URL}reservations/devolucao/${id}`, {
+      method: "PUT",
+      data: reservation,
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": token ? `Bearer ${token}` : undefined
+      },
+    });
   }
 
   const deleteBooks = async (id: string): Promise<void> => {
@@ -146,6 +171,7 @@ const clienteservice = (
       }
     } catch (error) {
       console.error("Erro inesperado:", error);
+      window.location.href = "/error?statusCode=500";
       return null;
     }
   };
@@ -164,18 +190,19 @@ const clienteservice = (
           "Content-Type": "application/json",
         },
       });
-  
+
       console.log("Resposta da API de registro:", response);
-  
+
       const result = response?.Result;
-  
+
       if (!result || !result.Sucesso) {
         return { Sucesso: false, Mensagem: "Falha no registro. Tente novamente." };
       }
-  
+
       return result;
     } catch (error) {
       console.error("Erro ao registrar o usuário:", error);
+      window.location.href = "/error?statusCode=500";
       return { Sucesso: false, Mensagem: "Ocorreu um erro inesperado. Tente novamente." };
     }
   };

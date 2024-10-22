@@ -25,30 +25,18 @@ const ReservationTable: React.FC<ReservationTableProps> = ({
     const clienteServiceInstance = clienteservice(request);
 
     // Adiciona autenticação
-    const { token } = useAuthToken(); 
+    const { roles, isTokenDecoded } = useAuthToken();
 
     // Estado para verificar se o usuário é ADMIN
     const [isAdmin, setIsAdmin] = useState(false);
 
     // Decodifica o token para verificar se o usuário tem a role ADMIN
     useEffect(() => {
-        if (token) {
-            try {
-                // Decodifica o token
-                const decodedToken: any = jwtDecode(token);
-    
-                // Acessa o campo 'http://schemas.microsoft.com/ws/2008/06/identity/claims/role'
-                const roles = decodedToken['http://schemas.microsoft.com/ws/2008/06/identity/claims/role'];
-    
-                // Verifica se o usuário tem a role 'ADMIN'
-                if (roles && roles.includes('ADMIN')) {
-                    setIsAdmin(true);
-                }
-            } catch (error) {
-                console.error('Error decoding token:', error);
-            }
+        // Verificar somente após o token ter sido decodificado
+        if (isTokenDecoded && roles.includes('ADMIN')) {
+            setIsAdmin(true);
         }
-    }, [token]);
+    }, [roles, isTokenDecoded]);
 
     const handlePageChange = (event: React.ChangeEvent<unknown>, value: number) => {
         setPage(value);
@@ -72,7 +60,7 @@ const ReservationTable: React.FC<ReservationTableProps> = ({
         try {
             // Atualiza o banco de dados
             await clienteServiceInstance.updateReservations(reservation.Id, reservation);
-    
+
             // Atualiza o estado da tabela localmente para refletir as mudanças
             const newReservations = [...tableData];
             newReservations[index] = reservation; // Atualiza a reserva na tabela com o novo status
