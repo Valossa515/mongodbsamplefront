@@ -87,14 +87,11 @@ const clienteservice = (
     }
   };
 
-  const getReservations = async (
-    page = 1,
-    pageSize = 10
-  ): Promise<GetReservationsResponse | null> => {
+  const getReservations = async (page = 1, pageSize = 10, searchQuery = ''): Promise<GetReservationsResponse | null> => {
     try {
       const token = localStorage.getItem("authToken");
       const response = await request<GetReservationsResponse>(
-        `${BACKEND_URL}reservations?page=${page}&pageSize=${pageSize}`,
+        `${BACKEND_URL}reservations?page=${page}&pageSize=${pageSize}&userName=${searchQuery}`,
         {
           method: "GET",
           headers: {
@@ -104,8 +101,7 @@ const clienteservice = (
         }
       );
       return response;
-    }
-    catch (error: any) {
+    } catch (error: any) {
       if (error.response && error.response.status === 401) {
         // Redireciona para a página de erro 401
         window.location.href = "/error?statusCode=401";
