@@ -7,8 +7,14 @@ interface GetBooksResponse {
   Data: BookDTO[]; // Array of BookDTOs
   TotalCount: number; // Total count of books
 }
-
-interface GetReservationsResponse {
+export interface SingleReservationResponse {
+  Result: ReservationDTO;
+  Status: number;
+  Message: string | null;
+  Errors: string | null;
+  TraceId: string | null;
+}
+export interface GetReservationsResponse {
   Data: ReservationDTO[];
   TotalCount: number;
 }
@@ -87,11 +93,14 @@ const clienteservice = (
     }
   };
 
-  const getReservations = async (page = 1, pageSize = 10, searchQuery = ''): Promise<GetReservationsResponse | null> => {
+  const getReservations = async (
+    page = 1,
+    pageSize = 10
+  ): Promise<GetReservationsResponse | null> => {
     try {
       const token = localStorage.getItem("authToken");
       const response = await request<GetReservationsResponse>(
-        `${BACKEND_URL}reservations?page=${page}&pageSize=${pageSize}&userName=${searchQuery}`,
+        `${BACKEND_URL}reservations?page=${page}&pageSize=${pageSize}`,
         {
           method: "GET",
           headers: {
@@ -101,7 +110,8 @@ const clienteservice = (
         }
       );
       return response;
-    } catch (error: any) {
+    }
+    catch (error: any) {
       if (error.response && error.response.status === 401) {
         // Redireciona para a página de erro 401
         window.location.href = "/error?statusCode=401";
@@ -135,7 +145,35 @@ const clienteservice = (
         "Authorization": token ? `Bearer ${token}` : undefined
       },
     });
-  }
+  };
+
+  const getReservationByIdOrUserName = async (
+    userName?: string
+): Promise<GetReservationsResponse | SingleReservationResponse | null> => {
+    const token = localStorage.getItem("authToken");
+    try {
+        const response = await request<GetReservationsResponse | SingleReservationResponse>(
+            `${BACKEND_URL}reservations/search?userName=${userName}`,
+            {
+                method: "GET",
+                headers: {
+                    "Content-Type": "application/json",
+                    "Authorization": token ? `Bearer ${token}` : undefined,
+                },
+            }
+        );
+
+        return response;
+    } catch (error: any) {
+        if (error.response && error.response.status === 401) {
+            // Redireciona para a página de erro 401
+            window.location.href = "/error?statusCode=401";
+        } else {
+            console.error("Ocorreu um erro ao buscar as reservas:", error);
+        }
+        return null;
+    }
+};
 
   const deleteBooks = async (id: string): Promise<void> => {
     const token = localStorage.getItem("authToken");
@@ -203,7 +241,7 @@ const clienteservice = (
     }
   };
 
-  return { createBook, createReservation, getBooks, updateBooks, deleteBooks, login, register, getReservations, updateReservations };
+  return { createBook, createReservation, getBooks, updateBooks, deleteBooks, login, register, getReservations, updateReservations, getReservationByIdOrUserName };
 };
 
 export default clienteservice;

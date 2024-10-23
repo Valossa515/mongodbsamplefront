@@ -8,4 +8,5 @@ export interface ReservationDTO{
     ReservationDate: Date;
     ReturnDate?: Date;
     Status?: string;
+    Books?: BookDTO[];
 }
