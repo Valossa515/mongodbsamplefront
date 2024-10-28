@@ -136,7 +136,13 @@ const ReservationTable: React.FC<ReservationTableProps> = ({
                                     <Button variant="contained" color="error" onClick={() => handleUpdate(index, 'Canceled')}>Cancelar</Button>
                                 </>
                             ) : (
-                                <span>{row.Status === 'Completed' ? 'Reserva concluída.' : 'Reserva cancelada.'}</span>
+                                <span>
+                                    {row.Status === 'Completed'
+                                        ? 'Reserva concluída.'
+                                        : row.Status === 'Expired'
+                                            ? 'Reserva expirada.'
+                                            : 'Reserva cancelada.'}
+                                </span>
                             )}
                         </TableCell>
                         <TableCell className="text-left p-4">
