@@ -1,19 +1,17 @@
-"use client";
-
-import { useSearchParams } from 'next/navigation';
+import { GetServerSideProps } from 'next';
 import ErrorPage from '../components/ErrorPage';
 
+interface ErrorProps {
+  statusCode: number;
+}
 
-const Error: React.FC = () => {
+const Error: React.FC<ErrorProps> = ({ statusCode }) => {
+  return <ErrorPage statusCode={statusCode} />;
+};
 
-  if (typeof window === 'undefined') {
-    return <ErrorPage statusCode={404} />;
-  }
-
-  const searchParams = useSearchParams();
-  const statusCode = searchParams.get('statusCode') || '404';
-
-  return <ErrorPage statusCode={parseInt(statusCode, 10)} />;
+export const getServerSideProps: GetServerSideProps = async (context) => {
+  const statusCode = parseInt(context.query.statusCode as string, 10) || 404;
+  return { props: { statusCode } };
 };
 
 export default Error;
