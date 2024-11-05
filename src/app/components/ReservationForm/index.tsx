@@ -33,8 +33,26 @@ const defaultReservation: ReservationDTO = {
 const validationSchema = Yup.object({
     UserName: Yup.string().required("Nome do Cliente é obrigatório"),
     ReservationDate: Yup.date()
+        .nullable()
         .required("Data de reserva é obrigatória")
-        .typeError("Formato de data inválido"),
+        .typeError("Formato de data inválido")
+        .test(
+            "data-futura",
+            "A data de reserva não pode estar no passado",
+            (value) => {
+                if (!value) return false;
+
+                const selectedDate = new Date(value);
+                const today = new Date();
+
+                // Define o horário de hoje como 00:00 para comparação
+                today.setHours(0, 0, 0, 0);
+                return selectedDate >= today;
+            }
+        ),
+    BookIds: Yup.array()
+        .min(1, "Selecione pelo menos um livro")
+        .required("Livro é obrigatório"),
 });
 
 const ReservationForm: React.FC<ReservationFormProps> = ({
@@ -43,17 +61,21 @@ const ReservationForm: React.FC<ReservationFormProps> = ({
     handleAddReservation,
 }) => {
     const [books, setBooks] = useState<BookDTO[]>([]);
-    const [selectedBookIds, setSelectedBookIds] = useState<string[]>([]);
 
     const formik = useFormik({
-        initialValues: reservation,
+        initialValues: {
+            ...reservation,
+            ReservationDate: reservation.ReservationDate || null, // Use null para datas não preenchidas
+        },
         validationSchema: validationSchema,
         enableReinitialize: true,
+        validateOnChange: true,
+        validateOnBlur: true,
         onSubmit: (values, { setSubmitting, setTouched }) => {
-            
             setTouched({
                 UserName: true,
                 ReservationDate: true,
+                BookIds: true,
             });
 
             let formattedDate = "";
@@ -73,7 +95,6 @@ const ReservationForm: React.FC<ReservationFormProps> = ({
             const reservationData = {
                 ...values,
                 ReservationDate: formattedDate,
-                BookIds: selectedBookIds,
             };
 
             handleAddReservation({
@@ -84,7 +105,7 @@ const ReservationForm: React.FC<ReservationFormProps> = ({
                 ...reservationData,
                 ReservationDate: new Date(reservationData.ReservationDate),
             });
-            setSelectedBookIds([]);
+            formik.resetForm();
             setSubmitting(true);
         },
     });
@@ -92,11 +113,11 @@ const ReservationForm: React.FC<ReservationFormProps> = ({
     const { request } = useHttp();
     const clienteServiceInstance = clienteservice(request);
 
-    const handleChange = (event: SelectChangeEvent<typeof selectedBookIds>) => {
+    const handleChange = (event: SelectChangeEvent<string[]>) => {
         const {
             target: { value },
         } = event;
-        setSelectedBookIds(typeof value === "string" ? value.split(",") : value);
+        formik.setFieldValue("BookIds", typeof value === "string" ? value.split(",") : value);
     };
 
     useEffect(() => {
@@ -116,7 +137,7 @@ const ReservationForm: React.FC<ReservationFormProps> = ({
                 }
                 setBooks(allBooks);
                 if (allBooks.length > 0) {
-                    setSelectedBookIds([allBooks[0].Id]);
+                    formik.setFieldValue("BookIds", [allBooks[0].Id]);
                 }
             } catch (error) {
                 console.error("Erro ao carregar os livros:", error);
@@ -173,30 +194,33 @@ const ReservationForm: React.FC<ReservationFormProps> = ({
                         variant="outlined"
                         id="ReservationDate"
                         name="ReservationDate"
-                        value={formik.values.ReservationDate}
-                        onChange={formik.handleChange}
-                        onBlur={formik.handleBlur}
-                        error={
-                            formik.touched.ReservationDate &&
-                            Boolean(formik.errors.ReservationDate)
-                        }
-                        helperText={
-                            formik.touched.ReservationDate
-                                ? (formik.errors.ReservationDate as string)
-                                : ""
-                        }
+                        value={formik.values.ReservationDate ? new Date(formik.values.ReservationDate).toISOString().slice(0, 16) : ""}
+                        onChange={(e) => {
+                            formik.setFieldValue("ReservationDate", e.target.value);
+                        }}
+                        onBlur={(e) => {
+                            formik.handleBlur(e);
+                            formik.validateField("ReservationDate");
+                        }}
+                        error={formik.touched.ReservationDate && Boolean(formik.errors.ReservationDate)}
+                        slotProps={{
+                            inputLabel: {
+                                shrink: true,
+                            },
+                        }}
                         sx={{
                             "& .MuiOutlinedInput-root": {
                                 "& fieldset": {
-                                    borderColor:
-                                        formik.touched.ReservationDate &&
-                                        Boolean(formik.errors.ReservationDate)
-                                            ? "red"
-                                            : "inherit",
+                                    borderColor: formik.touched.ReservationDate && Boolean(formik.errors.ReservationDate)
+                                        ? "red"
+                                        : "inherit",
                                 },
                             },
                         }}
                     />
+                    {formik.touched.ReservationDate && formik.errors.ReservationDate && (
+                        <Typography color="error">{String(formik.errors.ReservationDate)}</Typography>
+                    )}
                 </Grid>
 
                 <Grid size={12}>
@@ -215,17 +239,18 @@ const ReservationForm: React.FC<ReservationFormProps> = ({
                     <Select
                         labelId="demo-simple-select-label"
                         id="demo-simple-select"
-                        value={selectedBookIds}
+                        name="BookIds"
+                        value={formik.values.BookIds}
                         onChange={handleChange}
+                        onBlur={formik.handleBlur}
                         multiple
                         renderValue={(selected) =>
                             selected
-                                .map(
-                                    (id) => books.find((book) => book.Id === id)?.BookName || id
-                                )
+                                .map((id) => books.find((book) => book.Id === id)?.BookName || id)
                                 .join(", ")
                         }
                         className={`w-full`}
+                        error={formik.touched.BookIds && Boolean(formik.errors.BookIds)}
                     >
                         {books.map((book) => (
                             <MenuItem key={book.Id} value={book.Id}>
@@ -233,6 +258,9 @@ const ReservationForm: React.FC<ReservationFormProps> = ({
                             </MenuItem>
                         ))}
                     </Select>
+                    {formik.touched.BookIds && formik.errors.BookIds && (
+                        <Typography color="error">{formik.errors.BookIds}</Typography>
+                    )}
                 </Grid>
                 <Grid size={12}>
                     <Button fullWidth type="submit" variant="contained" color="primary">

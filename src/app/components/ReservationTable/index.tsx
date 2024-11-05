@@ -14,7 +14,6 @@ interface ReservationTableProps {
 const ReservationTable: React.FC<ReservationTableProps> = ({
     reservations,
     setReservations,
-    setCurrentReservation
 }) => {
     const [page, setPage] = useState(1);
     const [pageSize] = useState(10);
@@ -146,7 +145,9 @@ const ReservationTable: React.FC<ReservationTableProps> = ({
                             )}
                         </TableCell>
                         <TableCell className="text-left p-4">
-                            {row.ReservationDate && row.ReturnDate && isWithin7Days(new Date(row.ReservationDate), new Date(row.ReturnDate)) ? (
+                            {row.Status === 'Expired' ? (
+                                <span className="text-red-500">🔴</span>
+                            ) : row.ReservationDate && row.ReturnDate && isWithin7Days(new Date(row.ReservationDate), new Date(row.ReturnDate)) ? (
                                 <span className="text-green-500">🟢</span>
                             ) : (
                                 <span className="text-red-500">🔴</span>
