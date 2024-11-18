@@ -8,9 +8,9 @@ interface ErrorProps {
   };
 }
 
-const Error: React.FC<ErrorProps> = ({ searchParams }) => {
+const Erro: React.FC<ErrorProps> = ({ searchParams }) => {
   // Captura o statusCode dos parâmetros da URL
-  const statusCode = parseInt(searchParams.statusCode || '404', 10);
+  const statusCode = parseInt(searchParams.statusCode ?? '404', 10);
 
   // Redireciona ou exibe a página de erro baseada no statusCode
   if (![401, 403, 404, 500].includes(statusCode)) {
@@ -20,4 +20,4 @@ const Error: React.FC<ErrorProps> = ({ searchParams }) => {
   return <ErrorPage statusCode={statusCode} />;
 };
 
-export default Error;
+export default Erro;
